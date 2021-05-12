@@ -1,0 +1,17 @@
+<config>
+    <blast_db_dir/>
+    <chromosome_data_dir/>
+    <fastq_dir/>
+    <fastq_file_pattern/>
+    <fastq_query_examine/>
+    <fastq_query_terminator/>
+    <fastq_query_terminator_mismatch/>
+    <job_title/>
+    <log_dir/>
+    <minimum_query_length/>
+    <mongodb_access/>
+    <shift/>
+    <shift_decode/>
+    <temp_dir/>
+    <test_limit/>
+</config>
