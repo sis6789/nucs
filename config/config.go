@@ -69,6 +69,7 @@ func init() {
 	}
 	obj.RunName = time.Now().Format("20060102-150405.999999")
 	obj.FastqQueryTerminatorLength = len(obj.FastqQueryTerminator)
+	obj.MongodbAccess = "mongodb://localhost:27017"
 }
 
 func n(p string) string {
