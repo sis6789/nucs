@@ -16,6 +16,8 @@ import (
 type jobConfig struct {
 	BlastDb                      string `xml:"blast_db"`
 	BlastDbAbs                   string `xml:"blast_db_abs"`
+	BlastTaskCount               int    `xml:"blast_task_count"`
+	BlastTaskCpuCount            int    `xml:"blast_task_cpu_count"`
 	ChromosomeDataDir            string `xml:"chromosome_data_dir"`
 	ChromosomeDataDirAbs         string `xml:"chromosome_data_dir_abs"`
 	FastqDir                     string `xml:"fastq_dir"`
@@ -86,6 +88,12 @@ func n(p string) string {
 }
 
 func checkBlank() {
+	if obj.BlastTaskCount == 0 {
+		obj.BlastTaskCount = 10
+	}
+	if obj.BlastTaskCpuCount == 0 {
+		obj.BlastTaskCpuCount = 1
+	}
 	if obj.BlastDb == "" && readConfig {
 		log.Fatalln("no BlastDb")
 	}
@@ -191,6 +199,8 @@ func ReadConfig(configFileName string) {
 func LogReport() {
 	log.Println("BlastDb=", obj.BlastDb)
 	log.Println("BlastDbAbs=", obj.BlastDbAbs)
+	log.Println("BlastTaskCount=", obj.BlastTaskCount)
+	log.Println("BlastTaskCpuCount=", obj.BlastTaskCpuCount)
 	log.Println("ChromosomeDataDir=", obj.ChromosomeDataDir)
 	log.Println("ChromosomeDataDirAbs=", obj.ChromosomeDataDirAbs)
 	log.Println("FastqDir=", obj.FastqDir)
@@ -219,6 +229,8 @@ func LogReport() {
 
 func BlastDb() string                   { return obj.BlastDb }
 func BlastDbAbs() string                { return obj.BlastDbAbs }
+func BlastTaskCount() int               { return obj.BlastTaskCount }
+func BlastTaskCpuCount() int            { return obj.BlastTaskCpuCount }
 func ChromosomeDataDir() string         { return obj.ChromosomeDataDir }
 func ChromosomeDataDirAbs() string      { return obj.ChromosomeDataDirAbs }
 func FastqDir() string                  { return obj.FastqDir }

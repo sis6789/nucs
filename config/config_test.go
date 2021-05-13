@@ -14,6 +14,8 @@ func TestAny(t *testing.T) {
 	}
 	fmt.Println("BlastDb=", BlastDb())
 	fmt.Println("BlastDbAbs=", BlastDbAbs())
+	fmt.Println("BlastTaskCount=", BlastTaskCount())
+	fmt.Println("BlastTaskCpuCount=", BlastTaskCpuCount())
 	fmt.Println("ChromosomeDataDir=", ChromosomeDataDir())
 	fmt.Println("ChromosomeDataDirAbs=", ChromosomeDataDirAbs())
 	fmt.Println("FastqDir=", FastqDir())

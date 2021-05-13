@@ -1,5 +1,7 @@
 <config>
     <blast_db/>
+    <blast_task_count>10</blast_task_count>
+    <blast_task_cpu_count>1</blast_task_cpu_count>
     <chromosome_data_dir/>
     <fastq_dir/>
     <fastq_file_pattern/>
