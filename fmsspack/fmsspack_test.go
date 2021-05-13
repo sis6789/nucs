@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAny(t *testing.T) {
+func TestCoder(t *testing.T) {
 	maxFNum := int(math.Pow(2, 14) - 1)
 	{
 		fmt.Println(`----------`)
