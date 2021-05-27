@@ -37,7 +37,7 @@ type FlatFMS struct {
 	GChr           int       `bson:"gchr"`           //염색체번호
 	GFrom          int       `bson:"gfrom"`          //서열 시작위치
 	GTo            int       `bson:"gto"`            //서열 종료위치
-	Fms            uint32    `bson:"Fms"`            //해당 FMS 값
+	Fms            uint32    `bson:"fms"`            //해당 FMS 값
 	Sequence       string    `bson:"sequence"`       //판결 서열
 	Quality        string    `bson:"quality"`        //판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
 	QualityTB      [2]string `bson:"qualitytb"`      //판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
