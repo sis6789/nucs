@@ -12,6 +12,10 @@ func TestAny(t *testing.T) {
 	} else {
 		ReadConfig("linux.xml")
 	}
+
+	mrec := MongoReport()
+	fmt.Println(mrec)
+
 	fmt.Println("BlastDb=", BlastDb())
 	fmt.Println("BlastDbAbs=", BlastDbAbs())
 	fmt.Println("BlastTaskCount=", BlastTaskCount())
