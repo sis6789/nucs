@@ -336,11 +336,18 @@ func MaxNuc(w string) (mostNuc string, quality string) {
 	sort.Slice(wc, func(i, j int) bool {
 		return wc[i].c > wc[j].c
 	})
+	// check top 2 nuc count
+	// 상위 2개가 동일한 개수이면 불명(*)으로 결정한다.
+	if wc[0].c == wc[1].c {
+		mostNuc = "*"
+	} else {
+		mostNuc = string(wc[0].a)
+	}
 	// quality
 	quality = "."
 	if wc[0].c < len(w) {
 		quality = strconv.Itoa(int(float64(wc[0].c) / float64(len(w)) * 10.0))
 	}
 
-	return string(wc[0].a), quality
+	return mostNuc, quality
 }
