@@ -8,28 +8,34 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+
+	"github.com/sis6789/nucs/nuc2"
 )
 
 type Genome struct {
-	RecKey         string    `bson:"_id"`
-	GChr           int       `bson:"gchr"`           //염색체번호
-	GFrom          int       `bson:"gfrom"`          //서열 시작위치
-	GTo            int       `bson:"gto"`            //서열 종료위치
-	Len            int       `bson:"len"`            // 서열 길이
-	Human          string    `bson:"human"`          // Poll result, 인간 게놈 자료
-	Poll           string    `bson:"poll"`           //종합 판결 서열
-	PollQuality    string    `bson:"pollquality"`    //종합 판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
-	CountNucs      int       `bson:"countnucs"`      //판결에 사용한 전체 염기수, 평평화된 것의 합
-	CountRead      int       `bson:"countread"`      //사용된 library 수량
-	ASequence      []string  `bson:"asequence"`      //each Fms information, 각 FMS 시작과 끝에 맞추어 조정한 서열 (전부 동일한 길이)
-	AQuality       []string  `bson:"aquality"`       //각 FMS 시작과 끝에 맞추어 조정한 품질 (전부 동일한 길이)
-	PollDifference []string  `bson:"polldifference"` //종합 판결 서열과 다른 값들 표시
-	Ratio          []float32 `bson:"ratio"`          //전체 염기수 대비 대표서열과 상이한 비율
-	FmsList        []FlatFMS `bson:"fmslist"`        //판결에 사용된 모든 FMS 정보
-	CatNames       []string  `bson:"catnames"`       // File group information
-	CatCountRead   []int     `bson:"catcountread"`   //분할 기준에 따라 각 분할별 판결에 사용된 평평화 FMS 갯수
-	CatCountNuc    []int     `bson:"catcountnuc"`    //분할 기준에 따라 각 분할별 판결에 사용된 평평화 염기 갯수
-	CatCount       int       `bson:"catcount"`
+	RecKey          string    `bson:"_id"`
+	GChr            int       `bson:"gchr"`               //염색체번호
+	GFrom           int       `bson:"gfrom"`              //서열 시작위치
+	GTo             int       `bson:"gto"`                //서열 종료위치
+	Len             int       `bson:"len"`                // 서열 길이
+	Human           string    `bson:"human"`              // Poll result, 인간 게놈 자료
+	Poll            string    `bson:"poll"`               //종합 판결 서열
+	PollQuality     string    `bson:"pollquality"`        //종합 판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
+	CountNucs       int       `bson:"countnucs"`          //판결에 사용한 전체 염기수, 평평화된 것의 합
+	CountRead       int       `bson:"countread"`          //사용된 library 수량
+	ASequence       []string  `bson:"asequence"`          //each Fms information, 각 FMS 시작과 끝에 맞추어 조정한 서열 (전부 동일한 길이)
+	AQuality        []string  `bson:"aquality"`           //각 FMS 시작과 끝에 맞추어 조정한 품질 (전부 동일한 길이)
+	PollDifference  []string  `bson:"polldifference"`     //종합 판결 서열과 다른 값들 표시
+	Ratio           []float32 `bson:"ratio"`              //전체 염기수 대비 대표서열과 상이한 비율
+	FmsList         []FlatFMS `bson:"fmslist"`            //판결에 사용된 모든 FMS 정보
+	CatNames        []string  `bson:"catnames"`           //File group information
+	CatCountRead    []int     `bson:"catcountread"`       //
+	CatCountNuc     []int     `bson:"catcountnuc"`        //
+	CatCount        int       `bson:"catcount"`           //
+	CountFms        int       `bson:"count_fms"`          //평편화된 FMS 관련 수치
+	CountFmsNucs    int       `bson:"count_fms_nucs"`     //
+	CatCountFmsRead []int     `bson:"cat_count_fms_read"` //
+	CatCountFmsNucs []int     `bson:"cat_count_fms_nucs"` //
 }
 
 type FlatFMS struct {
@@ -142,7 +148,7 @@ func (x *NucSeq) SameNuc(y NucSeq) bool {
 	return x.Fms == y.Fms && x.Chr == y.Chr && x.PosLast[y.Side] == y.PosStart
 }
 
-func (x *NucSeq) SameLine(y NucLine) bool {
+func (x *NucSeq) SameGpos(y NucLine) bool {
 	return x.Fms == y.Fms && x.Chr == y.Gchr && x.PosStart == y.Gpos
 }
 
@@ -199,7 +205,7 @@ func (x *NucSeq) Set(nl NucLine) {
 }
 
 func (x NucSeq) IsValid() bool {
-	if len(x.NucTB[0]) < 2 || len(x.NucTB[1]) < 2 {
+	if len(x.NucTB[0]) < 3 || len(x.NucTB[1]) < 3 {
 		return false
 	}
 	nucTop, _ := Compress(x.NucTB[0])
@@ -268,6 +274,7 @@ func (x *NucSeq) AddQid(nl NucLine) {
 	x.Qid[nl.Side][nl.Qid] = v
 }
 
+// AllReadCount return count of fastq lines
 func (x NucSeq) AllReadCount() [2]int {
 	vSum := [2]int{0, 0}
 	for side := 0; side < 2; side++ {
@@ -283,25 +290,37 @@ func (x *NucSeq) Finalize() (int, FlatFMS) {
 	var flatFMS FlatFMS
 	flatFMS.RecKey = uuid.NewString()
 
-	rCnt := x.AllReadCount()
+	rCnt := x.AllReadCount() // 각 서열의 발생 건수를 다 더한다.
 	if rCnt[0] > 1 && rCnt[1] > 1 {
+		// 상위 하위 strand 2개 이상이 공존
 		x.NucTB[0], x.NucQualityTB[0] = Compress(x.NucTB[0])
 		x.NucTB[1], x.NucQualityTB[1] = Compress(x.NucTB[1])
-		x.NucAll, x.NucAllQuality = Compress(x.NucAll)
-		if x.NucTB[0] == x.NucTB[1] {
-			if len(x.NucTB[0]) < 5 {
-				returnClass = 4
-			} else {
-				returnClass = 0 // valid
-				flatFMS.Set(*x)
-			}
-		} else {
-			returnClass = 1 // btDifferCount++
-		}
+		x.NucAll = nuc2.Nuc2String(x.NucTB[0], x.NucTB[1])
+		x.NucAllQuality = nuc2.Nuc2DString(x.NucTB[0], x.NucTB[1])
+		//x.NucAll, x.NucAllQuality = Compress(x.NucAll)
+
+		// 상위와 하위 동일성 상관 없이 적합한 것으로 최종 결과에 반영
+		// 일부 틀리는 부분은 틀리는 표시를 하도록 함
+		returnClass = 0 // valid
+		flatFMS.Set(*x)
+
+		//if x.NucTB[0] == x.NucTB[1] {
+		//	if len(x.NucTB[0]) < 5 {
+		//		returnClass = 4 // Too Short
+		//	} else {
+		//		returnClass = 0 // valid
+		//		flatFMS.Set(*x)
+		//	}
+		//} else {
+		//	returnClass = 1 // btDifferCount++
+		//}
 	} else {
+		// 상위 하위 수량이 1개 또는 없음
 		if rCnt[0] == 0 || rCnt[1] == 0 {
+			// 상위나 하위 하나만 존재
 			returnClass = 2 // orphanCount++
 		} else {
+			// 상위 하나 하위 하나만 존재
 			returnClass = 3 // tbOneCount++
 		}
 	}
