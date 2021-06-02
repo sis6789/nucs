@@ -1,2 +1,4 @@
-github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
-github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.2.1-0.20210331013651-512b657a4288 h1:bO1UWmo7qbij7bI1Hm94/X3Z8742JIFilHfOiLrTUFA=
+github.com/google/uuid v1.2.1-0.20210331013651-512b657a4288/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/sis6789/nucs/nuc2 v0.0.0-20210602060203-fe09a68f2099 h1:LhSIFDUk/nb6dFZcZyFRQPMof0jkIu4/QgDB/g5HtO4=
+github.com/sis6789/nucs/nuc2 v0.0.0-20210602060203-fe09a68f2099/go.mod h1:PwPg4J6P3PGNubdtQmgIdi4RPg0w+PYSsd+pw3bAwUM=
