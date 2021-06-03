@@ -65,8 +65,8 @@ func (x *FlatFMS) Set(v NucSeq) {
 		x.GTo = v.PosLast[1]
 	}
 	x.Fms = uint32(v.Fms)
-	x.Sequence = v.NucTB[0]
-	x.Quality = v.NucQualityTB[0]
+	x.Sequence = v.NucAll
+	x.Quality = v.NucAllQuality
 	x.QualityTB[0] = v.NucQualityTB[0]
 	x.QualityTB[1] = v.NucQualityTB[1]
 	modString := ""
