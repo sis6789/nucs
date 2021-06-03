@@ -1,6 +1,8 @@
 // Package nuc2 Determine nucleotide value between Top strand and Bottom strand
 package nuc2
 
+import "strings"
+
 var v [128][128]byte
 var d [128][128]byte
 
@@ -54,13 +56,19 @@ func Nuc2(n1, n2 byte) byte {
 }
 
 func Nuc2String(s1, s2 string) string {
-	b1 := []byte(s1)
-	b2 := []byte(s2)
-	if len(b2) > len(b1) {
-		b2 = b2[:len(b1)]
-	} else if len(b1) > len(b2) {
-		b1 = b1[:len(b2)]
+	var w1, w2 string
+	if len(s1) < len(s2) {
+		w1 = s1 + strings.Repeat(" ", len(s2)-len(s1))
+		w2 = s2
+	} else if len(s2) < len(s1) {
+		w1 = s1
+		w2 = s2 + strings.Repeat(" ", len(s1)-len(s2))
+	} else {
+		w1 = s1
+		w2 = s2
 	}
+	b1 := []byte(w1)
+	b2 := []byte(w2)
 	var b3 []byte
 	for ix := 0; ix < len(b1); ix++ {
 		b3 = append(b3, v[b1[ix]][b2[ix]])
@@ -73,13 +81,19 @@ func Nuc2D(n1, n2 byte) byte {
 }
 
 func Nuc2DString(s1, s2 string) string {
-	b1 := []byte(s1)
-	b2 := []byte(s2)
-	if len(b2) > len(b1) {
-		b2 = b2[:len(b1)]
-	} else if len(b1) > len(b2) {
-		b1 = b1[:len(b2)]
+	var w1, w2 string
+	if len(s1) < len(s2) {
+		w1 = s1 + strings.Repeat(" ", len(s2)-len(s1))
+		w2 = s2
+	} else if len(s2) < len(s1) {
+		w1 = s1
+		w2 = s2 + strings.Repeat(" ", len(s1)-len(s2))
+	} else {
+		w1 = s1
+		w2 = s2
 	}
+	b1 := []byte(w1)
+	b2 := []byte(w2)
 	var b3 []byte
 	for ix := 0; ix < len(b1); ix++ {
 		b3 = append(b3, d[b1[ix]][b2[ix]])
