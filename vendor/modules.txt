@@ -1,0 +1,6 @@
+# github.com/google/uuid v1.2.0
+## explicit
+github.com/google/uuid
+# github.com/mitchellh/go-homedir v1.1.0
+## explicit
+github.com/mitchellh/go-homedir

@@ -18,8 +18,8 @@ func TestAny(t *testing.T) {
 	resp := ApplyBtop(req)
 
 	line1 := resp.QueryBP
-	spos := resp.GenomeAddress
-	qpos := resp.QueryAddress
+	sPos := resp.GenomeAddress
+	qPos := resp.QueryAddress
 	modify := resp.ModifyAddress
 	d1 := resp.Line1
 	d2 := resp.Line2
@@ -29,6 +29,6 @@ func TestAny(t *testing.T) {
 	fmt.Println(d1)
 	fmt.Println(d2)
 	for ix := 0; ix < len(line1); ix++ {
-		fmt.Println(ix+1, string(line1[ix]), spos[ix], qpos[ix], modify[ix])
+		fmt.Println(ix+1, string(line1[ix]), sPos[ix], qPos[ix], modify[ix])
 	}
 }
