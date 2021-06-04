@@ -363,6 +363,12 @@ func (x *NucSeq) Finalize() (int, FlatFMS) {
 			returnClass = 3 // tbOneCount++
 		}
 	}
+
+	flatFMS.FlatNucCount = strings.Count(flatFMS.Sequence, "A") +
+		strings.Count(flatFMS.Sequence, "C") +
+		strings.Count(flatFMS.Sequence, "G") +
+		strings.Count(flatFMS.Sequence, "T")
+
 	return returnClass, flatFMS
 }
 
