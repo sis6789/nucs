@@ -13,29 +13,78 @@ import (
 )
 
 type Genome struct {
-	RecKey          string    `bson:"_id"`
-	GChr            int       `bson:"gchr"`               //염색체번호
-	GFrom           int       `bson:"gfrom"`              //서열 시작위치
-	GTo             int       `bson:"gto"`                //서열 종료위치
-	Len             int       `bson:"len"`                // 서열 길이
-	Human           string    `bson:"human"`              // Poll result, 인간 게놈 자료
-	Poll            string    `bson:"poll"`               //종합 판결 서열
-	PollQuality     string    `bson:"pollquality"`        //종합 판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
-	CountNucs       int       `bson:"countnucs"`          //판결에 사용한 전체 염기수, 평평화된 것의 합
-	CountRead       int       `bson:"countread"`          //사용된 library 수량
-	ASequence       []string  `bson:"asequence"`          //each Fms information, 각 FMS 시작과 끝에 맞추어 조정한 서열 (전부 동일한 길이)
-	AQuality        []string  `bson:"aquality"`           //각 FMS 시작과 끝에 맞추어 조정한 품질 (전부 동일한 길이)
-	PollDifference  []string  `bson:"polldifference"`     //종합 판결 서열과 다른 값들 표시
-	Ratio           []float32 `bson:"ratio"`              //전체 염기수 대비 대표서열과 상이한 비율
-	FmsList         []FlatFMS `bson:"fmslist"`            //판결에 사용된 모든 FMS 정보
-	CatNames        []string  `bson:"catnames"`           //File group information
-	CatCountRead    []int     `bson:"catcountread"`       //
-	CatCountNuc     []int     `bson:"catcountnuc"`        //
-	CatCount        int       `bson:"catcount"`           //
-	CountFms        int       `bson:"count_fms"`          //평편화된 FMS 관련 수치
-	CountFmsNucs    int       `bson:"count_fms_nucs"`     //
-	CatCountFmsRead []int     `bson:"cat_count_fms_read"` //
-	CatCountFmsNucs []int     `bson:"cat_count_fms_nucs"` //
+	RecKey          string      `bson:"_id"`
+	GChr            int         `bson:"gchr"`               //염색체번호
+	GFrom           int         `bson:"gfrom"`              //서열 시작위치
+	GTo             int         `bson:"gto"`                //서열 종료위치
+	Len             int         `bson:"len"`                // 서열 길이
+	Human           string      `bson:"human"`              // Poll result, 인간 게놈 자료
+	Poll            string      `bson:"poll"`               //종합 판결 서열
+	PollQuality     string      `bson:"pollquality"`        //종합 판결 정확도(0-9) 제일 많은 염기 비율; "." 전부 일치
+	CountNucs       int         `bson:"countnucs"`          //판결에 사용한 전체 염기수, 평평화된 것의 합
+	CountRead       int         `bson:"countread"`          //사용된 library 수량
+	ASequence       []string    `bson:"asequence"`          //each Fms information, 각 FMS 시작과 끝에 맞추어 조정한 서열 (전부 동일한 길이)
+	AQuality        []string    `bson:"aquality"`           //각 FMS 시작과 끝에 맞추어 조정한 품질 (전부 동일한 길이)
+	PollDifference  []string    `bson:"polldifference"`     //종합 판결 서열과 다른 값들 표시
+	Ratio           []float32   `bson:"ratio"`              //전체 염기수 대비 대표서열과 상이한 비율
+	FmsList         []FlatFMS   `bson:"fmslist"`            //판결에 사용된 모든 FMS 정보
+	CatNames        []string    `bson:"catnames"`           //File group information
+	CatCountRead    []int       `bson:"catcountread"`       //
+	CatCountNuc     []int       `bson:"catcountnuc"`        //
+	CatCount        int         `bson:"catcount"`           //
+	CountFms        int         `bson:"count_fms"`          //평편화된 FMS 관련 수치
+	CountFmsNucs    int         `bson:"count_fms_nucs"`     //
+	CatCountFmsRead []int       `bson:"cat_count_fms_read"` //
+	CatCountFmsNucs []int       `bson:"cat_count_fms_nucs"` //
+	UniqueFms       []DiffMerge `bson:"unique_fms"`         // Unique sequence set
+}
+
+type DiffMerge struct {
+	FmsLink         []int  `bson:"fms_link"`  // related fms index number
+	CatCount        int    `bson:"cat_count"` // count of active file category
+	Difference      string `bson:"difference"`
+	Modify          string `bson:"modify"`
+	CountRead       int    `bson:"count_read"`
+	CountNuc        int    `bson:"count_nuc"`
+	CatRead         []int  `bson:"cat_read"`
+	CatNuc          []int  `bson:"cat_nuc"`
+	CountFms        int    `bson:"count_fms"`
+	CountFmsNucs    int    `bson:"count_fms_nucs"`
+	CatCountFmsRead []int  `bson:"cat_count_fms_read"`
+	CatCountFmsNucs []int  `bson:"cat_count_fms_nucs"`
+	IsMut           bool   `bson:"is_mut"`
+}
+
+func (x *Genome) MakeUniqueFms() {
+	m := make(map[string]DiffMerge)
+	for ix := 0; ix < len(x.ASequence); ix++ {
+		d, ok := m[x.PollDifference[ix]]
+		if !ok {
+			d.CatRead = make([]int, len(x.CatNames))
+			d.CatNuc = make([]int, len(x.CatNames))
+			d.CatCountFmsRead = make([]int, len(x.CatNames))
+			d.CatCountFmsNucs = make([]int, len(x.CatNames))
+			d.Difference = x.PollDifference[ix]
+			d.IsMut = false
+		}
+		var catNum int
+		for catNum = 0; x.CatCountFmsRead[catNum] == 0; catNum++ {
+		}
+		d.FmsLink = append(d.FmsLink, ix)
+		d.CatRead[catNum] += x.FmsList[ix].CountRead
+		d.CatNuc[catNum] += x.FmsList[ix].CountNucs
+		d.CountRead += x.FmsList[ix].CountRead
+		d.CountNuc += x.FmsList[ix].CountNucs
+		d.Modify += x.FmsList[ix].ModifySequence
+		d.CountFms++
+		d.CountFmsNucs += x.FmsList[ix].FlatNucCount
+		d.CatCountFmsRead[catNum]++
+		d.CatCountFmsNucs[catNum] += x.FmsList[ix].FlatNucCount
+		m[x.PollDifference[ix]] = d
+	}
+	for _, v := range m {
+		x.UniqueFms = append(x.UniqueFms, v)
+	}
 }
 
 type FlatFMS struct {
@@ -54,6 +103,7 @@ type FlatFMS struct {
 	CountReadTB    [2]int    `bson:"countreadtb"`    //사용된 library 상위와 하위 갯수
 	QueryID        []int     `bson:"queryid"`        //사용된 시료 번호 리스트
 	QueryCount     []int     `bson:"querycount"`     //사용된 시료 번호 갯수
+	FlatNucCount   int       `bson:"flat_nuc_count"` //편평화된 fms 구성 염기 수 (정상만 계수)
 }
 
 func (x *FlatFMS) Set(v NucSeq) {
@@ -303,17 +353,6 @@ func (x *NucSeq) Finalize() (int, FlatFMS) {
 		// 일부 틀리는 부분은 틀리는 표시를 하도록 함
 		returnClass = 0 // valid
 		flatFMS.Set(*x)
-
-		//if x.NucTB[0] == x.NucTB[1] {
-		//	if len(x.NucTB[0]) < 5 {
-		//		returnClass = 4 // Too Short
-		//	} else {
-		//		returnClass = 0 // valid
-		//		flatFMS.Set(*x)
-		//	}
-		//} else {
-		//	returnClass = 1 // btDifferCount++
-		//}
 	} else {
 		// 상위 하위 수량이 1개 또는 없음
 		if rCnt[0] == 0 || rCnt[1] == 0 {
