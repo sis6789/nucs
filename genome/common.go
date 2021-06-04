@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/sis6789/nucs/file_category"
 	"github.com/sis6789/nucs/nuc2"
 )
 
@@ -67,19 +68,17 @@ func (x *Genome) MakeUniqueFms() {
 			d.Difference = x.PollDifference[ix]
 			d.IsMut = false
 		}
-		var catNum int
-		for catNum = 0; x.CatCountFmsRead[catNum] == 0; catNum++ {
-		}
+		categoryIndex := file_category.FileCategory(x.FmsList[ix].Fms)
 		d.FmsLink = append(d.FmsLink, ix)
-		d.CatRead[catNum] += x.FmsList[ix].CountRead
-		d.CatNuc[catNum] += x.FmsList[ix].CountNucs
+		d.CatRead[categoryIndex] += x.FmsList[ix].CountRead
+		d.CatNuc[categoryIndex] += x.FmsList[ix].CountNucs
 		d.CountRead += x.FmsList[ix].CountRead
 		d.CountNuc += x.FmsList[ix].CountNucs
 		d.Modify += x.FmsList[ix].ModifySequence
 		d.CountFms++
 		d.CountFmsNucs += x.FmsList[ix].FlatNucCount
-		d.CatCountFmsRead[catNum]++
-		d.CatCountFmsNucs[catNum] += x.FmsList[ix].FlatNucCount
+		d.CatCountFmsRead[categoryIndex]++
+		d.CatCountFmsNucs[categoryIndex] += x.FmsList[ix].FlatNucCount
 		m[x.PollDifference[ix]] = d
 	}
 	for _, v := range m {
