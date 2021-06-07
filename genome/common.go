@@ -44,6 +44,7 @@ type DiffMerge struct {
 	FmsLink         []int  `bson:"fms_link"`  // related fms index number
 	CatCount        int    `bson:"cat_count"` // count of active file category
 	Difference      string `bson:"difference"`
+	Sequence        string `bson:"sequence"`
 	Modify          string `bson:"modify"`
 	CountRead       int    `bson:"count_read"`
 	CountNuc        int    `bson:"count_nuc"`
@@ -66,6 +67,7 @@ func (x *Genome) MakeUniqueFms() {
 			d.CatCountFmsRead = make([]int, len(x.CatNames))
 			d.CatCountFmsNucs = make([]int, len(x.CatNames))
 			d.Difference = x.PollDifference[ix]
+			d.Sequence = x.FmsList[ix].Sequence
 			d.IsMut = false
 		}
 		categoryIndex := file_category.FileCategory(x.FmsList[ix].Fms)
