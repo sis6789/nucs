@@ -67,7 +67,7 @@ func (x *Genome) MakeUniqueFms() {
 			d.CatCountFmsRead = make([]int, len(x.CatNames))
 			d.CatCountFmsNucs = make([]int, len(x.CatNames))
 			d.Difference = x.PollDifference[ix]
-			d.Sequence = x.FmsList[ix].Sequence
+			d.Sequence = x.ASequence[ix]
 			d.IsMut = false
 		}
 		categoryIndex := file_category.FileCategory(x.FmsList[ix].Fms)
