@@ -140,8 +140,8 @@ func (x *Genome) MakeUniqueFms() {
 	// Repeat for each flattened fms
 	for ix := 0; ix < len(x.ASequence); ix++ {
 		if noDiffPattern.MatchString(x.PollDifference[ix]) {
-			noDiffLowPos = MinInt(x.FmsList[ix].GFrom, noDiffLowPos)
-			noDiffHighPos = MaxInt(x.FmsList[ix].GTo, noDiffHighPos)
+			noDiffLowPos = MaxInt(x.FmsList[ix].GFrom, noDiffLowPos)
+			noDiffHighPos = MinInt(x.FmsList[ix].GTo, noDiffHighPos)
 			accumulator(&noDiff, x, ix)
 		} else {
 			d, ok := m[x.PollDifference[ix]]
