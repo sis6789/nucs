@@ -3,6 +3,7 @@ package genome
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -57,32 +58,114 @@ type DiffMerge struct {
 	IsMut           bool   `bson:"is_mut"`
 }
 
-func (x *Genome) MakeUniqueFms() {
-	m := make(map[string]DiffMerge)
-	for ix := 0; ix < len(x.ASequence); ix++ {
-		d, ok := m[x.PollDifference[ix]]
-		if !ok {
-			d.CatRead = make([]int, len(x.CatNames))
-			d.CatNuc = make([]int, len(x.CatNames))
-			d.CatCountFmsRead = make([]int, len(x.CatNames))
-			d.CatCountFmsNucs = make([]int, len(x.CatNames))
-			d.Difference = x.PollDifference[ix]
-			d.Sequence = x.ASequence[ix]
-			d.IsMut = false
+var MaxIntValue = int(^uint(0) >> 1)
+var MinIntValue = -MaxIntValue - 1
+
+func MinInt(x ...int) int {
+	lowInt := MaxIntValue
+	for _, v := range x {
+		if v < lowInt {
+			lowInt = v
 		}
-		categoryIndex := file_category.FileCategory(x.FmsList[ix].Fms)
-		d.FmsLink = append(d.FmsLink, ix)
-		d.CatRead[categoryIndex] += x.FmsList[ix].CountRead
-		d.CatNuc[categoryIndex] += x.FmsList[ix].CountNucs
-		d.CountRead += x.FmsList[ix].CountRead
-		d.CountNuc += x.FmsList[ix].CountNucs
-		d.Modify += x.FmsList[ix].ModifySequence
-		d.CountFms++
-		d.CountFmsNucs += x.FmsList[ix].FlatNucCount
-		d.CatCountFmsRead[categoryIndex]++
-		d.CatCountFmsNucs[categoryIndex] += x.FmsList[ix].FlatNucCount
-		m[x.PollDifference[ix]] = d
 	}
+	return lowInt
+}
+
+func MaxInt(x ...int) int {
+	highInt := MinIntValue
+	for _, v := range x {
+		if v > highInt {
+			highInt = v
+		}
+	}
+	return highInt
+}
+
+func (x *Genome) MakeUniqueFms() {
+	noDiffPattern := regexp.MustCompile(`^ *\.+ *$`)
+	m := make(map[string]DiffMerge)
+	// Prepare no-difference environment for later save
+	var noDiffLowPos, noDiffHighPos int
+	var noDiff DiffMerge
+	noDiff.CatRead = make([]int, len(x.CatNames))
+	noDiff.CatNuc = make([]int, len(x.CatNames))
+	noDiff.CatCountFmsRead = make([]int, len(x.CatNames))
+	noDiff.CatCountFmsNucs = make([]int, len(x.CatNames))
+	noDiff.IsMut = false
+	// define accumulator
+	var accumulator = func(v *DiffMerge, x *Genome, ix int) {
+		categoryIndex := file_category.FileCategory(x.FmsList[ix].Fms)
+		v.FmsLink = append(v.FmsLink, ix)
+		v.CatRead[categoryIndex] += x.FmsList[ix].CountRead
+		v.CatNuc[categoryIndex] += x.FmsList[ix].CountNucs
+		v.CountRead += x.FmsList[ix].CountRead
+		v.CountNuc += x.FmsList[ix].CountNucs
+		v.Modify += x.FmsList[ix].ModifySequence
+		v.CountFms++ // below flattened count
+		v.CountFmsNucs += x.FmsList[ix].FlatNucCount
+		if v.CatCountFmsRead[categoryIndex] == 0 {
+			v.CatCount++
+		}
+		v.CatCountFmsRead[categoryIndex]++
+		v.CatCountFmsNucs[categoryIndex] += x.FmsList[ix].FlatNucCount
+	}
+	var valueLine = func(outer1, outer2, inner1, inner2 int, displayStr, fill string) string {
+		fillLeft := fill[0:1]
+		fillRight := fillLeft
+		fillCenter := displayStr
+		if len(fill) >= 2 {
+			fillRight = fill[1:2]
+		}
+		// handle too bing inner string
+		if inner1 < outer1 {
+			displayStr = displayStr[outer1-inner1:]
+			fillCenter = displayStr
+			inner1 = outer1
+		}
+		if inner1+len(displayStr)-1 > outer2 {
+			displayStr = displayStr[:len(displayStr)-((inner1+len(displayStr)-1)-outer2)]
+			fillCenter = displayStr
+			inner2 = outer2
+		}
+
+		if len(displayStr) < (inner2 - inner1 + 1) {
+			fillCenter += strings.Repeat("_", (inner2-inner1+1)-len(displayStr))
+		} else if len(displayStr) > (inner2 - inner1 + 1) {
+			fillCenter = displayStr[0 : inner2-inner1+1]
+		}
+		leftAppend := strings.Repeat(fillLeft, inner1-outer1)
+		rightAppend := strings.Repeat(fillRight, outer2-(inner1+len(displayStr)-1))
+		return leftAppend + fillCenter + rightAppend
+	}
+	// Repeat for each flattened fms
+	for ix := 0; ix < len(x.ASequence); ix++ {
+		if noDiffPattern.MatchString(x.PollDifference[ix]) {
+			noDiffLowPos = MinInt(x.FmsList[ix].GFrom, noDiffLowPos)
+			noDiffHighPos = MaxInt(x.FmsList[ix].GTo, noDiffHighPos)
+			accumulator(&noDiff, x, ix)
+		} else {
+			d, ok := m[x.PollDifference[ix]]
+			if !ok {
+				d.CatRead = make([]int, len(x.CatNames))
+				d.CatNuc = make([]int, len(x.CatNames))
+				d.CatCountFmsRead = make([]int, len(x.CatNames))
+				d.CatCountFmsNucs = make([]int, len(x.CatNames))
+				d.Difference = x.PollDifference[ix]
+				d.Sequence = x.ASequence[ix]
+				d.IsMut = false
+			}
+			accumulator(&d, x, ix)
+			m[x.PollDifference[ix]] = d
+		}
+	}
+	// finalize no difference fms
+	noDiff.Difference = valueLine(x.GFrom, x.GTo, noDiffLowPos, noDiffHighPos,
+		strings.Repeat(".", noDiffHighPos-noDiffLowPos+1), " ")
+	noDiff.Sequence = strings.Repeat(" ", noDiffLowPos-x.GFrom) +
+		x.Poll[noDiffLowPos-x.GFrom:len(x.Poll)-(x.GTo-noDiffHighPos)] +
+		strings.Repeat(" ", x.GTo-noDiffHighPos)
+	x.UniqueFms = append(x.UniqueFms, noDiff)
+	// make slice from map which maintains unique difference
 	for _, v := range m {
 		x.UniqueFms = append(x.UniqueFms, v)
 	}
