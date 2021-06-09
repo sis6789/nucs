@@ -12,6 +12,7 @@ import (
 
 	"github.com/sis6789/nucs/file_category"
 	"github.com/sis6789/nucs/nuc2"
+	"github.com/sis6789/nucs/utility"
 )
 
 type Genome struct {
@@ -58,34 +59,12 @@ type DiffMerge struct {
 	IsMut           bool   `bson:"is_mut"`
 }
 
-var MaxIntValue = int(^uint(0) >> 1)
-var MinIntValue = -MaxIntValue - 1
-
-func MinInt(x ...int) int {
-	lowInt := MaxIntValue
-	for _, v := range x {
-		if v < lowInt {
-			lowInt = v
-		}
-	}
-	return lowInt
-}
-
-func MaxInt(x ...int) int {
-	highInt := MinIntValue
-	for _, v := range x {
-		if v > highInt {
-			highInt = v
-		}
-	}
-	return highInt
-}
-
 func (x *Genome) MakeUniqueFms() {
 	noDiffPattern := regexp.MustCompile(`^ *\.+ *$`)
 	m := make(map[string]DiffMerge)
 	// Prepare no-difference environment for later save
-	var noDiffLowPos, noDiffHighPos int
+	noDiffLowPos := utility.MaxIntValue
+	noDiffHighPos := utility.MinIntValue
 	var noDiff DiffMerge
 	noDiff.CatRead = make([]int, len(x.CatNames))
 	noDiff.CatNuc = make([]int, len(x.CatNames))
@@ -109,39 +88,12 @@ func (x *Genome) MakeUniqueFms() {
 		v.CatCountFmsRead[categoryIndex]++
 		v.CatCountFmsNucs[categoryIndex] += x.FmsList[ix].FlatNucCount
 	}
-	var valueLine = func(outer1, outer2, inner1, inner2 int, displayStr, fill string) string {
-		fillLeft := fill[0:1]
-		fillRight := fillLeft
-		fillCenter := displayStr
-		if len(fill) >= 2 {
-			fillRight = fill[1:2]
-		}
-		// handle too bing inner string
-		if inner1 < outer1 {
-			displayStr = displayStr[outer1-inner1:]
-			fillCenter = displayStr
-			inner1 = outer1
-		}
-		if inner1+len(displayStr)-1 > outer2 {
-			displayStr = displayStr[:len(displayStr)-((inner1+len(displayStr)-1)-outer2)]
-			fillCenter = displayStr
-			inner2 = outer2
-		}
 
-		if len(displayStr) < (inner2 - inner1 + 1) {
-			fillCenter += strings.Repeat("_", (inner2-inner1+1)-len(displayStr))
-		} else if len(displayStr) > (inner2 - inner1 + 1) {
-			fillCenter = displayStr[0 : inner2-inner1+1]
-		}
-		leftAppend := strings.Repeat(fillLeft, inner1-outer1)
-		rightAppend := strings.Repeat(fillRight, outer2-(inner1+len(displayStr)-1))
-		return leftAppend + fillCenter + rightAppend
-	}
 	// Repeat for each flattened fms
 	for ix := 0; ix < len(x.ASequence); ix++ {
 		if noDiffPattern.MatchString(x.PollDifference[ix]) {
-			noDiffLowPos = MaxInt(x.FmsList[ix].GFrom, noDiffLowPos)
-			noDiffHighPos = MinInt(x.FmsList[ix].GTo, noDiffHighPos)
+			noDiffLowPos = utility.MinInt(x.FmsList[ix].GFrom, noDiffLowPos)
+			noDiffHighPos = utility.MaxInt(x.FmsList[ix].GTo, noDiffHighPos)
 			accumulator(&noDiff, x, ix)
 		} else {
 			d, ok := m[x.PollDifference[ix]]
@@ -159,12 +111,15 @@ func (x *Genome) MakeUniqueFms() {
 		}
 	}
 	// finalize no difference fms
-	noDiff.Difference = valueLine(x.GFrom, x.GTo, noDiffLowPos, noDiffHighPos,
-		strings.Repeat(".", noDiffHighPos-noDiffLowPos+1), " ")
-	noDiff.Sequence = strings.Repeat(" ", noDiffLowPos-x.GFrom) +
-		x.Poll[noDiffLowPos-x.GFrom:len(x.Poll)-(x.GTo-noDiffHighPos)] +
-		strings.Repeat(" ", x.GTo-noDiffHighPos)
-	x.UniqueFms = append(x.UniqueFms, noDiff)
+	if noDiffLowPos != utility.MaxIntValue && noDiffHighPos != utility.MinIntValue {
+		// if no-difference exist
+		noDiff.Difference = utility.ValueLine(x.GFrom, x.GTo, noDiffLowPos, noDiffHighPos,
+			strings.Repeat(".", noDiffHighPos-noDiffLowPos+1), " ")
+		noDiff.Sequence = strings.Repeat(" ", noDiffLowPos-x.GFrom) +
+			x.Poll[noDiffLowPos-x.GFrom:len(x.Poll)-(x.GTo-noDiffHighPos)] +
+			strings.Repeat(" ", x.GTo-noDiffHighPos)
+		x.UniqueFms = append(x.UniqueFms, noDiff)
+	}
 	// make slice from map which maintains unique difference
 	for _, v := range m {
 		x.UniqueFms = append(x.UniqueFms, v)
