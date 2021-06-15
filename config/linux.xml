@@ -9,6 +9,7 @@
     <fastq_query_terminator/>
     <fastq_query_terminator_mismatch/>
     <job_title/>
+    <l1prm>GGGAGGAGCCAAGATGGC</l1prm>
     <log_dir/>
     <minimum_query_length/>
     <mongodb_access/>
@@ -19,4 +20,7 @@
     <shift_decode/>
     <temp_dir/>
     <test_limit/>
+    <top_bottom_minimum_count>2</top_bottom_minimum_count>
+    <top_bottom_minimum_ratio>0.2</top_bottom_minimum_ratio>
+    <top_bottom_minimum_sum>4</top_bottom_minimum_sum>
 </config>

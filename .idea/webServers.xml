@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="10558579-1855-4e6a-a61c-a0f1a056528c" name="192.168.0.6">
+        <fileTransfer rootFolder="/home/isseo" accessType="SFTP" host="192.168.0.6" port="22" sshConfigId="3f4b499d-29b0-4715-8f93-44fa042d82af" sshConfig="isseo@192.168.0.6:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

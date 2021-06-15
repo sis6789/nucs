@@ -13,8 +13,8 @@ func TestAny(t *testing.T) {
 		ReadConfig("linux.xml")
 	}
 
-	mrec := MongoReport()
-	fmt.Println(mrec)
+	mRec := MongoReport()
+	fmt.Println(mRec)
 
 	fmt.Println("BlastDb=", BlastDb())
 	fmt.Println("BlastDbAbs=", BlastDbAbs())
@@ -30,6 +30,8 @@ func TestAny(t *testing.T) {
 	fmt.Println("FastqQueryTerminatorLength=", FastqQueryTerminatorLength())
 	fmt.Println("FastqQueryTerminatorMismatch=", FastqQueryTerminatorMismatch())
 	fmt.Println("JobTitle=", JobTitle())
+	fmt.Println("JobTitleRun=", JobTitleRun())
+	fmt.Println("L1prm=", L1prm())
 	fmt.Println("LogDir=", LogDir())
 	fmt.Println("LogDirAbs=", LogDirAbs())
 	fmt.Println("MinimumQueryLength=", MinimumQueryLength())
@@ -44,6 +46,11 @@ func TestAny(t *testing.T) {
 	fmt.Println("TempDir=", TempDir())
 	fmt.Println("TempDirAbs=", TempDirAbs())
 	fmt.Println("TestLimit=", TestLimit())
+	fmt.Println("TopBottomMinimumCount=", TopBottomMinimumCount())
+	fmt.Println("TopBottomMinimumRatio=", TopBottomMinimumRatio())
+	fmt.Println("TopBottomMinimumSum=", TopBottomMinimumSum())
+
+	LogReport()
 
 	LogAppend("append.fastq")
 	LogNew("new.fastq")

@@ -14,35 +14,39 @@ import (
 )
 
 type jobConfig struct {
-	BlastDb                      string `xml:"blast_db"`
-	BlastDbAbs                   string `xml:"blast_db_abs"`
-	BlastTaskCount               int    `xml:"blast_task_count"`
-	BlastTaskCpuCount            int    `xml:"blast_task_cpu_count"`
-	ChromosomeDataDir            string `xml:"chromosome_data_dir"`
-	ChromosomeDataDirAbs         string `xml:"chromosome_data_dir_abs"`
-	FastqDir                     string `xml:"fastq_dir"`
-	FastqDirAbs                  string `xml:"fastq_dir_abs"`
-	FastqFilePattern             string `xml:"fastq_file_pattern"`
-	FastqQueryExamine            string `xml:"fastq_query_examine"`
-	FastqQueryTerminator         string `xml:"fastq_query_terminator"`
-	FastqQueryTerminatorLength   int    `xml:"fastq_query_terminator_length"`
-	FastqQueryTerminatorMismatch int    `xml:"fastq_query_terminator_mismatch"`
-	JobTitle                     string `xml:"job_title"`
-	JobTitleRun                  string `xml:"job_title_run"`
-	LogDir                       string `xml:"log_dir"`
-	LogDirAbs                    string `xml:"log_dir_abs"`
-	MinimumQueryLength           int    `xml:"minimum_query_length"`
-	MongodbAccess                string `xml:"mongodb_access"`
-	RootDir                      string `xml:"root_dir"`
-	RootDirAbs                   string `xml:"root_dir_abs"`
-	RunName                      string `xml:"run_name"`
-	SaveDir                      string `xml:"save_dir"`
-	SaveDirAbs                   string `xml:"save_dir_abs"`
-	Shift                        string `xml:"shift"`
-	ShiftDecode                  string `xml:"shift_decode"`
-	TempDir                      string `xml:"temp_dir"`
-	TempDirAbs                   string `xml:"temp_dir_abs"`
-	TestLimit                    int    `xml:"test_limit"`
+	BlastDb                      string  `xml:"blast_db"`
+	BlastDbAbs                   string  `xml:"blast_db_abs"`
+	BlastTaskCount               int     `xml:"blast_task_count"`
+	BlastTaskCpuCount            int     `xml:"blast_task_cpu_count"`
+	ChromosomeDataDir            string  `xml:"chromosome_data_dir"`
+	ChromosomeDataDirAbs         string  `xml:"chromosome_data_dir_abs"`
+	FastqDir                     string  `xml:"fastq_dir"`
+	FastqDirAbs                  string  `xml:"fastq_dir_abs"`
+	FastqFilePattern             string  `xml:"fastq_file_pattern"`
+	FastqQueryExamine            string  `xml:"fastq_query_examine"`
+	FastqQueryTerminator         string  `xml:"fastq_query_terminator"`
+	FastqQueryTerminatorLength   int     `xml:"fastq_query_terminator_length"`
+	FastqQueryTerminatorMismatch int     `xml:"fastq_query_terminator_mismatch"`
+	JobTitle                     string  `xml:"job_title"`
+	JobTitleRun                  string  `xml:"job_title_run"`
+	L1prm                        string  `xml:"l1prm"`
+	LogDir                       string  `xml:"log_dir"`
+	LogDirAbs                    string  `xml:"log_dir_abs"`
+	MinimumQueryLength           int     `xml:"minimum_query_length"`
+	MongodbAccess                string  `xml:"mongodb_access"`
+	RootDir                      string  `xml:"root_dir"`
+	RootDirAbs                   string  `xml:"root_dir_abs"`
+	RunName                      string  `xml:"run_name"`
+	SaveDir                      string  `xml:"save_dir"`
+	SaveDirAbs                   string  `xml:"save_dir_abs"`
+	Shift                        string  `xml:"shift"`
+	ShiftDecode                  string  `xml:"shift_decode"`
+	TempDir                      string  `xml:"temp_dir"`
+	TempDirAbs                   string  `xml:"temp_dir_abs"`
+	TestLimit                    int     `xml:"test_limit"`
+	TopBottomMinimumCount        int     `xml:"top_bottom_minimum_count"`
+	TopBottomMinimumRatio        float64 `xml:"top_bottom_minimum_ratio"`
+	TopBottomMinimumSum          int     `xml:"top_bottom_minimum_sum"`
 }
 
 var obj jobConfig
@@ -197,34 +201,39 @@ func ReadConfig(configFileName string) {
 }
 
 func LogReport() {
-	log.Println("BlastDb=", obj.BlastDb)
-	log.Println("BlastDbAbs=", obj.BlastDbAbs)
-	log.Println("BlastTaskCount=", obj.BlastTaskCount)
-	log.Println("BlastTaskCpuCount=", obj.BlastTaskCpuCount)
-	log.Println("ChromosomeDataDir=", obj.ChromosomeDataDir)
-	log.Println("ChromosomeDataDirAbs=", obj.ChromosomeDataDirAbs)
-	log.Println("FastqDir=", obj.FastqDir)
-	log.Println("FastqDirAbs=", obj.FastqDirAbs)
-	log.Println("FastqFilePattern=", obj.FastqFilePattern)
-	log.Println("FastqQueryExamine=", obj.FastqQueryExamine)
-	log.Println("FastqQueryTerminator=", obj.FastqQueryTerminator)
-	log.Println("FastqQueryTerminatorLength=", obj.FastqQueryTerminatorLength)
-	log.Println("FastqQueryTerminatorMismatch=", obj.FastqQueryTerminatorMismatch)
-	log.Println("JobTitle=", obj.JobTitle)
-	log.Println("LogDir=", obj.LogDir)
-	log.Println("LogDirAbs=", obj.LogDirAbs)
-	log.Println("MinimumQueryLength=", obj.MinimumQueryLength)
-	log.Println("MongodbAccess=", obj.MongodbAccess)
-	log.Println("RootDir=", obj.RootDir)
-	log.Println("RootDirAbs=", obj.RootDirAbs)
-	log.Println("RunName=", obj.RunName)
-	log.Println("SaveDir=", obj.SaveDir)
-	log.Println("SaveDirAbs=", obj.SaveDirAbs)
-	log.Println("Shift=", obj.Shift)
-	log.Println("ShiftDecode=", obj.ShiftDecode)
-	log.Println("TempDir=", obj.TempDir)
-	log.Println("TempDirAbs=", obj.TempDirAbs)
-	log.Println("TestLimit=", obj.TestLimit)
+	log.Println("BlastDb=", BlastDb())
+	log.Println("BlastDbAbs=", BlastDbAbs())
+	log.Println("BlastTaskCount=", BlastTaskCount())
+	log.Println("BlastTaskCpuCount=", BlastTaskCpuCount())
+	log.Println("ChromosomeDataDir=", ChromosomeDataDir())
+	log.Println("ChromosomeDataDirAbs=", ChromosomeDataDirAbs())
+	log.Println("FastqDir=", FastqDir())
+	log.Println("FastqDirAbs=", FastqDirAbs())
+	log.Println("FastqFilePattern=", FastqFilePattern())
+	log.Println("FastqQueryExamine=", FastqQueryExamine())
+	log.Println("FastqQueryTerminator=", FastqQueryTerminator())
+	log.Println("FastqQueryTerminatorLength=", FastqQueryTerminatorLength())
+	log.Println("FastqQueryTerminatorMismatch=", FastqQueryTerminatorMismatch())
+	log.Println("JobTitle=", JobTitle())
+	log.Println("JobTitleRun=", JobTitleRun())
+	log.Println("L1prm=", L1prm())
+	log.Println("LogDir=", LogDir())
+	log.Println("LogDirAbs=", LogDirAbs())
+	log.Println("MinimumQueryLength=", MinimumQueryLength())
+	log.Println("MongodbAccess=", MongodbAccess())
+	log.Println("RootDir=", RootDir())
+	log.Println("RootDirAbs=", RootDirAbs())
+	log.Println("RunName=", RunName())
+	log.Println("SaveDir=", SaveDir())
+	log.Println("SaveDirAbs=", SaveDirAbs())
+	log.Println("Shift=", Shift())
+	log.Println("ShiftDecode=", ShiftDecode())
+	log.Println("TempDir=", TempDir())
+	log.Println("TempDirAbs=", TempDirAbs())
+	log.Println("TestLimit=", TestLimit())
+	log.Println("TopBottomMinimumCount=", TopBottomMinimumCount())
+	log.Println("TopBottomMinimumRatio=", TopBottomMinimumRatio())
+	log.Println("TopBottomMinimumSum=", TopBottomMinimumSum())
 }
 
 func BlastDb() string                   { return obj.BlastDb }
@@ -241,6 +250,8 @@ func FastqQueryTerminator() string      { return obj.FastqQueryTerminator }
 func FastqQueryTerminatorLength() int   { return obj.FastqQueryTerminatorLength }
 func FastqQueryTerminatorMismatch() int { return obj.FastqQueryTerminatorMismatch }
 func JobTitle() string                  { return obj.JobTitle }
+func JobTitleRun() string               { return obj.JobTitleRun }
+func L1prm() string                     { return obj.L1prm }
 func LogDir() string                    { return obj.LogDir }
 func LogDirAbs() string                 { return obj.LogDirAbs }
 func MinimumQueryLength() int           { return obj.MinimumQueryLength }
@@ -255,6 +266,9 @@ func ShiftDecode() string               { return obj.ShiftDecode }
 func TempDir() string                   { return obj.TempDir }
 func TempDirAbs() string                { return obj.TempDirAbs }
 func TestLimit() int                    { return obj.TestLimit }
+func TopBottomMinimumCount() int        { return obj.TopBottomMinimumCount }
+func TopBottomMinimumRatio() float64    { return obj.TopBottomMinimumRatio }
+func TopBottomMinimumSum() int          { return obj.TopBottomMinimumSum }
 
 func SaveName(fn string) string {
 	abs, err := filepath.Abs(obj.SaveDirAbs + separator + fn)

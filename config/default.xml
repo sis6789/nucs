@@ -9,6 +9,7 @@
     <fastq_query_terminator/>
     <fastq_query_terminator_mismatch/>
     <job_title/>
+    <l1prm>GGGAGGAGCCAAGATGGC</l1prm>
     <log_dir/>
     <minimum_query_length/>
     <mongodb_access/>
