@@ -374,14 +374,22 @@ func (x NucSeq) AllReadCount() [2]int {
 	return vSum
 }
 
+func validRatio(v1, v2 int) bool {
+	bigger := v1
+	if bigger < v2 {
+		bigger = v2
+	}
+	return (float64(bigger) / float64(v1+v2)) < 0.8
+}
+
 func (x *NucSeq) Finalize() (int, FlatFMS) {
 	returnClass := 0
 	var flatFMS FlatFMS
 	flatFMS.RecKey = uuid.NewString()
 
 	rCnt := x.AllReadCount() // 각 서열의 발생 건수를 다 더한다.
-	if rCnt[0] > 1 && rCnt[1] > 1 {
-		// 상위 하위 strand 2개 이상이 공존
+	if rCnt[0] > 1 && rCnt[1] > 1 && validRatio(rCnt[0], rCnt[1]) {
+		// 상위 하위 strand 2개 이상이 공존, 둘 사이의 공존 비율이 적절함
 		x.NucTB[0], x.NucQualityTB[0] = Compress(x.NucTB[0])
 		x.NucTB[1], x.NucQualityTB[1] = Compress(x.NucTB[1])
 		x.NucAll = nuc2.Nuc2String(x.NucTB[0], x.NucTB[1])
