@@ -123,7 +123,7 @@ func ApplyBtop(btopRequest BtopApplyRequest) BtopApplyResult {
 	var queryBP []byte
 	var genomeAddress []int
 	var queryAddress []int
-	var modifyAddress [][]string = make([][]string, 0)
+	var modifyAddress = make([][]string, 0)
 	var line1 []string
 	var line2 []string
 	var rStart int

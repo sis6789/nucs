@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAny(t *testing.T) {
+func TestApplyBtop(t *testing.T) {
 	a1 := []string{"-A-C-G-T"}
 	fmt.Println(a1)
 	Complement(a1)
