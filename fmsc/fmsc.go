@@ -82,7 +82,10 @@ func isLikely(ms1, ms2 string, maxEndure int) bool {
 	return differ <= maxEndure
 }
 
-// RemoveSimilarMolecular 1건만 있는 FMSC를 최대 수량의 FMSC에 더하고 해당 FMSC는 제거한다.
+// RemoveSimilarMolecular
+//
+// 1건만 있는 FMSC를 최대 수량의 FMSC에 더하고 해당 FMSC는 제거한다.
+//
 func RemoveSimilarMolecular(sliceFMSC *[]FMSC) {
 	type tFMSC struct {
 		ord    int
@@ -101,7 +104,7 @@ func RemoveSimilarMolecular(sliceFMSC *[]FMSC) {
 
 	// 한 개만 존재하는 것들을 상위의 유사한 FMS에 추가하고 삭제한다.
 	for ix := 0; ix < len(ordered) && ordered[ix].s.Count == 1; ix++ {
-		for jx := len(ordered) - 1; jx > ix; jx-- {
+		for jx := len(ordered) - 1; jx > ix && ordered[jx].s.Count > 1; jx-- {
 			if isLikely(ordered[ix].s.Molecular, ordered[jx].s.Molecular, 1) {
 				if ordered[ix].s.Side == ordered[jx].s.Side {
 					// 유사한 molecular-side에 추가한다. 그리고 삭제 마크를 한다.
