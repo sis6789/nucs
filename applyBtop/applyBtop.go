@@ -113,7 +113,6 @@ type BtopApplyRequest struct {
 // 누락은 원래 게놈값을 표시하고 1번줄에 `-`를 삽입한다.
 // 삽입은 직전 위치에 삽입된 값을 소문자로 표시하고 원래 자리에서는 제거한다.
 func ApplyBtop(btopRequest BtopApplyRequest) BtopApplyResult {
-
 	query := btopRequest.Query
 	qstart := btopRequest.Qstart
 	sstart := btopRequest.Sstart
