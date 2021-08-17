@@ -12,35 +12,24 @@ import (
 	"github.com/sis6789/nucs/utility"
 )
 
-//		   Query letter
-//  	 -	 A	 C	 G	 T
-// -	 0	-1	-1	-1	-1
-// A	-1	 1	-1	-1	-1
-// C	-1	-1	 1	-1	-1
-// G	-1	-1	-1	 1	-1
-// T	-1	-1	-1	-1	 1
-//
-// Gap open: -5
-var fitted = align.FittedAffine{
-	Matrix: align.Linear{
-		{0, -1, -1, -1, -1},
-		{-1, 1, -1, -1, -1},
-		{-1, -1, 1, -1, -1},
-		{-1, -1, -1, 1, -1},
-		{-1, -1, -1, -1, 1},
-	},
-	GapOpen: -5,
+var smith = align.SW{
+	{0, -1, -1, -1, -1},
+	{-1, 2, -1, -1, -1},
+	{-1, -1, 2, -1, -1},
+	{-1, -1, -1, 2, -1},
+	{-1, -1, -1, -1, 2},
 }
 var splitExpStr = `\[(\d+),(\d+)\)/\[(\d+),(\d+)\)=(-?\d+)|(-)/\[(\d+),(\d+)\)=(-?\d+)`
 var splitExp = regexp.MustCompile(splitExpStr)
 
 func Like(s1, s2 string) (start int, ratio float32, matchLen int, m1Str, m2Str string) {
+	// use smith waterman
 	fsa := &linear.Seq{Seq: alphabet.BytesToLetters([]byte(s1))}
 	fsa.Alpha = alphabet.DNAgapped
 	fsb := &linear.Seq{Seq: alphabet.BytesToLetters([]byte(s2))}
 	fsb.Alpha = alphabet.DNAgapped
 
-	aln, err := fitted.Align(fsa, fsb)
+	aln, err := smith.Align(fsa, fsb)
 	if err != nil {
 		return -1, 0.0, 0, "", ""
 	}
