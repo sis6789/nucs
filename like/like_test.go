@@ -6,8 +6,23 @@ import (
 )
 
 func TestLike(t *testing.T) {
-	gotStart, gotRatio, mLen, gotM1Str, gotM2Str := Like(
-		"ACGTACGTACGTACGTACGTACGTACGT"+"GATCGGAAGAGCACACGTCTGAACTCCAGTC",
+	sStart,
+		ratio,
+		qStart,
+		checkLen,
+		countMatch,
+		countFault,
+		sMatch,
+		qMatch := Like(
+		"TGGTTCAGTGCCACACATTGTAGATATTAAATATTTTATATTCAGTGACAGTCATAAACTTGTCCATTGTGTGTAAATAGTATTATGACTTTAACTCTGTGCACATTAGAATACAGTTCAGTTGGCGG",
 		"GATCGGAAGAGCACACGTCTGAACTCCAGTCAC")
-	fmt.Println(gotStart, gotRatio, mLen, gotM1Str, gotM2Str)
+	fmt.Println(
+		"sStart", sStart,
+		"ratio", ratio,
+		"checkLen", checkLen,
+		"qStart", qStart,
+		"countMatch", countMatch,
+		"countFault", countFault,
+		"sMatch", sMatch,
+		"qMatch", qMatch)
 }
