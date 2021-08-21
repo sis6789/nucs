@@ -10,7 +10,6 @@ type JsonConfig struct {
 	m map[string]interface{}
 }
 
-//New
 func New() JsonConfig {
 	return JsonConfig{
 		m: make(map[string]interface{}),
