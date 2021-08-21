@@ -1,4 +1,4 @@
-package JsonConfig
+package json_config
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ type JsonConfig struct {
 	m map[string]interface{}
 }
 
+//New
 func New() JsonConfig {
 	return JsonConfig{
 		m: make(map[string]interface{}),

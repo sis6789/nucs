@@ -1,6 +1,6 @@
 module github.com/sis6789/nucs
 
-go 1.16
+go 1.17
 
 require (
 	github.com/biogo/biogo v1.0.3
