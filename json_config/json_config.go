@@ -11,10 +11,9 @@ import (
 	"sort"
 )
 
-var jsonConfig map[string]interface{}
+var jsonConfig = make(map[string]interface{})
 
 func init() {
-	jsonConfig = make(map[string]interface{})
 	if homeDir, err := homedir.Expand("~"); err != nil {
 		jsonConfig["home_dir"], err = filepath.Abs(homeDir)
 		if err != nil {

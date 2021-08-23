@@ -4,6 +4,7 @@ package json_config
 
 import (
 	"path/filepath"
+	"time"
 )
 
 // K0 : For Keyomics
@@ -37,7 +38,18 @@ func K0() {
 
 func K1() {
 
-	jsonConfig["fastq_query_terminator_length"] = len(jsonConfig["fastq_query_terminator"].(string))
+	if _, exist := jsonConfig["job_title"]; !exist {
+		jsonConfig["job_title"] = time.Now().Format("20060102")
+	}
+	if _, exist := jsonConfig["run_name"]; !exist {
+		jsonConfig["run_name"] = time.Now().Format("20060102-1504")
+	}
+	if _, exist := jsonConfig["fastq_query_terminator"]; exist {
+		jsonConfig["fastq_query_terminator_length"] = len(jsonConfig["fastq_query_terminator"].(string))
+	} else {
+		jsonConfig["fastq_query_terminator_length"] = 0
+	}
+
 	jsonConfig["work_dir"] = filepath.Join(jsonConfig["root_dir"].(string),
 		jsonConfig["job_title"].(string), jsonConfig["run_name"].(string))
 	jsonConfig["log_dir"] = filepath.Join(jsonConfig["work_dir"].(string), "log")
