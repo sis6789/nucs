@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"time"
 )
 
 var jsonConfig map[string]interface{}
@@ -17,7 +16,7 @@ var jsonConfig map[string]interface{}
 func init() {
 	jsonConfig = make(map[string]interface{})
 	if homeDir, err := homedir.Expand("~"); err != nil {
-		jsonConfig["homeDir"], err = filepath.Abs(homeDir)
+		jsonConfig["home_dir"], err = filepath.Abs(homeDir)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -141,37 +140,13 @@ func Report() string {
 	return s
 }
 
-// K : For Keyomics
-func K() {
-	jsonConfig["rootDir"] = time.Now().Format("20060102")
-	jsonConfig["jobTitle"] = time.Now().Format("20060102-1504")
-	jsonConfig["runName"] = time.Now().Format("20060102-150405.999999")
-	jsonConfig["workDir"] = filepath.Join(
-		jsonConfig["homeDir"].(string), jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string))
-	jsonConfig["mongodbAccess"] = "mongodb://localhost:27017"
-	jsonConfig["blastTaskCount"] = 200
-	jsonConfig["blastTaskCpuCount"] = 2
-	jsonConfig["fastqQueryTerminatorLength"] =
-		len(jsonConfig["fastqQueryTerminator"].(string))
-	jsonConfig["logDir"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "log")
-	jsonConfig["saveDir"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "save")
-	jsonConfig["tempDir"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "temp")
-	jsonConfig["logDirAbs"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "log")
-	jsonConfig["saveDirAbs"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "save")
-	jsonConfig["tempDirAbs"] = filepath.Join(jsonConfig["rootDir"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string), "temp")
-}
-
-func F(folder, name, mode string) *os.File {
+func File(folder, name, mode string) *os.File {
 	var err error
 	var f *os.File
-	dir := filepath.Join(jsonConfig["workDir"].(string), folder)
+	dir := folder
+	if !filepath.IsAbs(folder) {
+		dir = filepath.Join(jsonConfig["work_dir"].(string), folder)
+	}
 	if err = os.MkdirAll(dir, 0777); err != nil {
 		log.Fatalln(err)
 	}
