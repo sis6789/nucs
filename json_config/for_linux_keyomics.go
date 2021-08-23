@@ -8,7 +8,7 @@ import (
 )
 
 // K : For Keyomics
-func K() {
+func K0() {
 
 	jsonConfig["blast_db"] = "/home/skjeong/NGS/RefGenom/hg38/hg38"
 	jsonConfig["chromosome_data_dir"] = "/home/skjeong/NGS/RefGenom/hg38"
