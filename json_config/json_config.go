@@ -14,11 +14,12 @@ import (
 var jsonConfig = make(map[string]interface{})
 
 func init() {
-	if homeDir, err := homedir.Expand("~"); err != nil {
+	if homeDir, err := homedir.Expand("~/"); err != nil {
 		jsonConfig["home_dir"], err = filepath.Abs(homeDir)
 		if err != nil {
 			log.Fatalln(err)
 		}
+		jsonConfig["work_dir"] = jsonConfig["home_dir"]
 	}
 }
 
