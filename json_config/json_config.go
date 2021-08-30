@@ -124,6 +124,20 @@ func Report() string {
 	return s
 }
 
+// ReportSlice : 환경 변수별 값을 string slice로 반환한다.
+func ReportSlice() []string {
+	var kl []string
+	for k := range jsonConfig {
+		kl = append(kl, k)
+	}
+	sort.Strings(kl)
+	var s []string
+	for _, k := range kl {
+		s = append(s, fmt.Sprintf("%v\t%v\n", k, jsonConfig[k]))
+	}
+	return s
+}
+
 // File - 지정한 폴더에 지정한 파일에 대해 *os.File을 반환한다. (mode: c, a, r, rw)
 func File(folder, name, mode string) *os.File {
 	var err error
