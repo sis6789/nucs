@@ -1,0 +1,19 @@
+{
+  "fastq_dir": "/home/skjeong/NGS/Control_Test/Mix_2nd/for_paper/Fastq",
+  "job_title": "test-bbb",
+  "run_name": "run01",
+  "root_dir": "~/keyomics_test",
+  "blast_db": "/home/skjeong/NGS/RefGenom/hg38/hg38",
+  "chromosome_data_dir": "/home/skjeong/NGS/RefGenom/hg38",
+  "fastq_file_pattern": "^.+fq$",
+  "fastq_query_examine": "(\\w{7,12})(CAGCTG([AC])CGTCAGTCT)(\\w+)$",
+  "fastq_query_terminator": "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC",
+  "mongodb_access": "mongodb://localhost:27017",
+  "blast_task_count": 200,
+  "blast_task_cpu_count": 4,
+  "minimum_query_length": 26,
+  "test_limit": 2147483647,
+  "top_bottom_minimum_count": 2,
+  "top_bottom_minimum_ratio": 0.2,
+  "top_bottom_minimum_sum": 4
+}

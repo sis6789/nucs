@@ -3,7 +3,6 @@ package json_config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,21 +11,6 @@ import (
 )
 
 var jsonConfig = make(map[string]interface{})
-
-func init() {
-	if homeDir, err := homedir.Expand("~/"); err != nil {
-		jsonConfig["home_dir"], err = filepath.Abs(homeDir)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		jsonConfig["work_dir"] = jsonConfig["home_dir"]
-	}
-}
-
-// Config : 저장 공간을 반환한다.
-func Config() map[string]interface{} {
-	return jsonConfig
-}
 
 // Decode : 입력을 json으로 바꾸고 해당 K,v 를 저장하거나 치환한다.
 func Decode(s []byte) {
@@ -140,6 +124,7 @@ func Report() string {
 	return s
 }
 
+// File - 지정한 폴더에 지정한 파일에 대해 *os.File을 반환한다. (mode: c, a, r, rw)
 func File(folder, name, mode string) *os.File {
 	var err error
 	var f *os.File
