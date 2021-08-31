@@ -1,7 +1,5 @@
 {
   "fastq_dir": "/home/skjeong/NGS/Control_Test/Mix_2nd/for_paper/Fastq",
-  "job_title": "test-bbb",
-  "run_name": "run01",
   "root_dir": "~/keyomics_test",
   "blast_db": "/home/skjeong/NGS/RefGenom/hg38/hg38",
   "chromosome_data_dir": "/home/skjeong/NGS/RefGenom/hg38",

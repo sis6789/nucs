@@ -1,7 +1,5 @@
 {
   "fastq_dir": "D:/keyomics_test/fastq",
-  "job_title": "test-bbb",
-  "run_name": "run01",
   "root_dir": "D:/keyomics_test",
   "blast_db": "D:/Utility/NCBI/db/hg38",
   "chromosome_data_dir": "D:/HumanGenome",
