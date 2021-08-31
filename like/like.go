@@ -23,8 +23,8 @@ var splitExp = regexp.MustCompile(splitExpStr)
 func Like(s1, s2 string) (
 	sStart int,
 	ratio float32,
-	checkLen int,
 	qStart int,
+	checkLen int,
 	countMatch int,
 	countFault int,
 	sMatch string,
