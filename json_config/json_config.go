@@ -121,7 +121,7 @@ func Report() string {
 	for _, k := range kl {
 		s += fmt.Sprintf("%v\t%v\n", k, jsonConfig[k])
 	}
-	return s
+	return s[0 : len(s)-1]
 }
 
 // ReportSlice : 환경 변수별 값을 string slice로 반환한다.
@@ -133,9 +133,9 @@ func ReportSlice() []string {
 	sort.Strings(kl)
 	var s []string
 	for _, k := range kl {
-		s = append(s, fmt.Sprintf("%v\t%v\n", k, jsonConfig[k]))
+		s = append(s, fmt.Sprintf("%v\t%v", k, jsonConfig[k]))
 	}
-	return s[0 : len(s)-1] // 마지막 \n 제거
+	return s
 }
 
 // File - 지정한 폴더에 지정한 파일에 대해 *os.File을 반환한다. (mode: c, a, r, rw)
