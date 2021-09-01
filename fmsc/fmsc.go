@@ -3,21 +3,21 @@ package fmsc
 import "sort"
 
 type FMSC struct {
-	File      string `bson:"f"`
-	Molecular string `bson:"m"`
-	Side      string `bson:"s"`
-	Count     int    `bson:"c"`
-	Ordinal   int64  `bson:"o"`
+	File      string  `bson:"f"`
+	Molecular string  `bson:"m"`
+	Side      string  `bson:"s"`
+	Count     int     `bson:"c"`
+	Ordinal   []int32 `bson:"o"`
 }
 
 // NewFMSC 새 FMSC 구조를 반환한다.
-func NewFMSC(file string, molecular string, side string, count int, ordinal int64) FMSC {
+func NewFMSC(file string, molecular string, side string, count int, ordinal int32) FMSC {
 	return FMSC{
 		File:      file,
 		Molecular: molecular,
 		Side:      side,
 		Count:     count,
-		Ordinal:   ordinal,
+		Ordinal:   []int32{ordinal},
 	}
 }
 

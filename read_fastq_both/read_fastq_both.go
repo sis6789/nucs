@@ -15,8 +15,8 @@ type ReadPair struct {
 	fileName   [2]string
 	file       [2]*os.File
 	scan       [2]*bufio.Scanner
-	lineNumber [2]int64
-	recCount   [2]int64
+	lineNumber [2]int32
+	recCount   [2]int32
 	Text       [2]string
 }
 
@@ -80,8 +80,8 @@ func (x *ReadPair) Close() {
 	x.fileName = [2]string{"", ""}
 	x.file = [2]*os.File{nil, nil}
 	x.scan = [2]*bufio.Scanner{nil, nil}
-	x.lineNumber = [2]int64{0, 0}
-	x.recCount = [2]int64{0, 0}
+	x.lineNumber = [2]int32{0, 0}
+	x.recCount = [2]int32{0, 0}
 	x.Text = [2]string{"", ""}
 }
 
@@ -132,7 +132,7 @@ func (x *ReadPair) Next() bool {
 // 지정된 순서가 존재하지 않으면 panic으로 종결한다.
 // 역순의 지정도 허용되지 않는다.
 // 저장되는 서열은 역순의 상보합 서열이다.
-func (x *ReadPair) Number() int64 {
+func (x *ReadPair) Number() int32 {
 	return x.recCount[0]
 }
 
@@ -141,7 +141,7 @@ func (x *ReadPair) Number() int64 {
 // 지정된 순서가 존재하지 않으면 panic으로 종결한다.
 // 역순의 지정도 허용되지 않는다.
 // 저장되는 서열은 역순의 상보합 서열이다.
-func (x *ReadPair) AtRec(recOrdinal int64) bool {
+func (x *ReadPair) AtRec(recOrdinal int32) bool {
 
 	if recOrdinal < x.recCount[0] {
 		panic("reverse ordinal is not supported.")
@@ -194,7 +194,7 @@ func (x *ReadPair) AtRec(recOrdinal int64) bool {
 // 지정된 순서가 존재하지 않으면 panic으로 종결한다.
 // 역순의 지정도 허용되지 않는다.
 // 저장되는 서열은 역순의 상보합 서열이다.
-func (x *ReadPair) At2Rec(recOrdinal int64) bool {
+func (x *ReadPair) At2Rec(recOrdinal int32) bool {
 
 	if !x.isPair {
 		panic("single file. Read2 is illegal.")
