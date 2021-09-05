@@ -2,8 +2,10 @@ package read_fastq_both
 
 import (
 	"bufio"
+	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 type ReadPair struct {
@@ -59,6 +61,21 @@ func (x *ReadPair) Open(path string, name ...string) {
 		panic("too many parameters. path and max 2 name.")
 	}
 	x.isReady = true
+}
+
+// $0 full Name, $1 Sample, $2 SamplePart, $3 Hypen, $4 Repeat, $5 Underline, $6 R or Null, $7 Read(1,2), $8 file Extension
+var r2NameRegex = regexp.MustCompile(`^(\w+)(\d+)(-)(\d+)(_)(R?)(\d+)(\.(fastq|fq))$`)
+
+// OpenPair - 경로와 R1/R2 파일을 준비한다. 지정은 R1 파일로 하고 R2 파일은 규칙에 따라 정해진 이름을 사용한다.
+func (x *ReadPair) OpenPair(path string, r1Name string) {
+
+	r1NameSplit := r2NameRegex.FindStringSubmatch(r1Name)
+	if r1NameSplit == nil {
+		log.Panicln("r1 r1Name format invalid.")
+		return
+	}
+	r2Name := r1NameSplit[1] + r1NameSplit[2] + r1NameSplit[3] + r1NameSplit[4] + r1NameSplit[5] + r1NameSplit[6] + "2" + r1NameSplit[8]
+	x.Open(path, r1Name, r2Name)
 }
 
 // Close - 사용중인 파일을 닫고 구조체를 초기화 한다.

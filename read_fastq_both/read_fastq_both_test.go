@@ -11,13 +11,12 @@ import (
 
 func Test_All(t *testing.T) {
 	w := PairList(`D:\keyomics_test\2020MG0213\etc\HN00122843`, `^[\w_-]+\.(fastq|fq)$`)
-	//for ix, v := range w {
-	//	wt := strings.Split(v, ";")
-	//	fmt.Println(ix, wt)
-	//}
-	//
 	var wg sync.WaitGroup
 	for _, f2 := range w {
+		{
+			z := New()
+			z.OpenPair(`D:\keyomics_test\2020MG0213\etc\HN00122843`, strings.Split(f2, ";")[0])
+		}
 		wg.Add(1)
 		go func(pP string, pF2 string) {
 			defer wg.Done()
@@ -37,7 +36,7 @@ func Test_All(t *testing.T) {
 				fmt.Println("EOF before", math.MaxInt64)
 			}
 			fmt.Println(x)
-			if !x.AtRec(math.MaxInt64) {
+			if !x.AtRec(math.MaxInt32) {
 				fmt.Println("EOF before", math.MaxInt64)
 			}
 			fmt.Println(x)
