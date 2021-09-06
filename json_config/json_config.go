@@ -61,6 +61,12 @@ func Write(fileName string) {
 	}
 }
 
+// Exist - 필드 존재 확인
+func Exist(field string) bool {
+	_, exist := jsonConfig[field]
+	return exist
+}
+
 // Get : 필드 값을 반환한다. 반환 값은 empty interface로 적절한 type inference를 해야 한다.
 func Get(field string) interface{} {
 	v, exist := jsonConfig[field]
