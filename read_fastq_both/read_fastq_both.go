@@ -63,13 +63,15 @@ func (x *ReadPair) Open(path string, name ...string) {
 	x.isReady = true
 }
 
-// $0 full Name, $1 Sample, $2 SamplePart, $3 Hypen, $4 Repeat, $5 Underline, $6 R or Null, $7 Read(1,2), $8 file Extension
-var r2NameRegex = regexp.MustCompile(`^(\w+)(\d+)(-)(\d+)(_)(R?)(\d+)(\.(fastq|fq))$`)
+// KeyomicsFastqFileNameRegex
+// $0 full Name, $1 Sample, $2 SamplePart, $3 Hypen, $4 Repeat,
+// $5 Underline, $6 R or Null, $7 Read(1,2), $8 file Extension
+var KeyomicsFastqFileNameRegex = regexp.MustCompile(`(?i)^(\w+)(\d+)(-)(\d+)(_)(R?)(\d+)(\.(fastq|fq))$`)
 
 // OpenPair - 경로와 R1/R2 파일을 준비한다. 지정은 R1 파일로 하고 R2 파일은 규칙에 따라 정해진 이름을 사용한다.
 func (x *ReadPair) OpenPair(path string, r1Name string) {
 
-	r1NameSplit := r2NameRegex.FindStringSubmatch(r1Name)
+	r1NameSplit := KeyomicsFastqFileNameRegex.FindStringSubmatch(r1Name)
 	if r1NameSplit == nil {
 		log.Panicln("r1 r1Name format invalid.")
 		return
