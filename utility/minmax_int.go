@@ -1,7 +1,9 @@
 package utility
 
-var MaxIntValue = int(^uint(0) >> 1)
-var MinIntValue = -MaxIntValue - 1
+import "math"
+
+var MaxIntValue = math.MaxInt
+var MinIntValue = math.MinInt
 
 func MinInt(x ...int) int {
 	lowInt := x[0]

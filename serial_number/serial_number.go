@@ -6,13 +6,13 @@ import (
 )
 
 type SerialNumber struct {
-	int32Channel chan int32
+	int32Channel chan int
 	active       bool
 }
 
 func New() *SerialNumber {
 	var sn SerialNumber
-	sn.int32Channel = make(chan int32, 5)
+	sn.int32Channel = make(chan int, 5)
 	sn.active = true
 	go sn.generator()
 	return &sn
@@ -24,14 +24,14 @@ func (x *SerialNumber) generator() {
 		x.active = false // set NA
 		fmt.Println("EOG")
 	}()
-	var num = int32(0)
+	var num = int(0)
 	for {
 		num++
 		x.int32Channel <- num
 	}
 }
 
-func (x *SerialNumber) Next() int32 {
+func (x *SerialNumber) Next() int {
 	if x.active {
 		return <-x.int32Channel
 	} else {

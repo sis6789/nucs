@@ -89,12 +89,12 @@ func Set(setValue map[string]interface{}) {
 	}
 }
 
-// Int64 : 숫자 필드로서 Int64 값을 반환한다. 숫자 값이 아니면 panic한다.
-func Int64(field string) int64 {
+// Int : 숫자 필드로서 Int64 값을 반환한다. 숫자 값이 아니면 panic한다.
+func Int(field string) int {
 	v, exist := jsonConfig[field]
 	if exist {
 		fv := v.(float64)
-		iv := int64(fv)
+		iv := int(fv)
 		return iv
 	}
 	return 0
