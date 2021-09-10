@@ -7,7 +7,6 @@ type FMSC struct {
 	Molecular string `bson:"m"`
 	Side      string `bson:"s"`
 	Count     int    `bson:"c"`
-	R12UniSeq []int  `bson:"r"`
 	Ordinal   []int  `bson:"o"`
 }
 

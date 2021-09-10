@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 )
 
 var jsonConfig = make(map[string]interface{})
@@ -97,22 +98,45 @@ func Set(setValue map[string]interface{}) {
 // Int : 숫자 필드로서 Int64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Int(field string) int {
 	v, exist := jsonConfig[field]
-	if exist {
-		fv := v.(float64)
-		iv := int(fv)
-		return iv
+	if !exist {
+		return 0
 	}
-	return 0
+	switch v.(type) {
+	case int:
+		return v.(int)
+	case float64:
+		return int(v.(float64))
+	case string:
+		if fv, err := strconv.ParseFloat(v.(string), 64); err != nil {
+			return 0
+		} else {
+			return int(fv)
+		}
+	default:
+		return 0.0
+	}
 }
 
 // Float64 : 숫자 필드로서 Float64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Float64(field string) float64 {
 	v, exist := jsonConfig[field]
-	if exist {
-		fv := v.(float64)
-		return fv
+	if !exist {
+		return 0.0
 	}
-	return 0.0
+	switch v.(type) {
+	case float64:
+		return v.(float64)
+	case int:
+		return float64(v.(int))
+	case string:
+		if fv, err := strconv.ParseFloat(v.(string), 64); err != nil {
+			return 0.0
+		} else {
+			return fv
+		}
+	default:
+		return 0.0
+	}
 }
 
 // String : 필드값을 문자열로 반환한다.
