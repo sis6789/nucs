@@ -17,7 +17,6 @@ func NewFMSC(file string, molecular string, side string, count int, ordinal int)
 		Molecular: molecular,
 		Side:      side,
 		Count:     count,
-		R12UniSeq: []int{},
 		Ordinal:   []int{ordinal},
 	}
 }
