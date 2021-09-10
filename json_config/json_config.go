@@ -12,6 +12,11 @@ import (
 
 var jsonConfig = make(map[string]interface{})
 
+// Map - return address of map structure "map[string]interface{}"
+func Map() *map[string]interface{} {
+	return &jsonConfig
+}
+
 // Decode : 입력을 json으로 바꾸고 해당 K,v 를 저장하거나 치환한다.
 func Decode(s []byte) {
 	tM := make(map[string]interface{})
