@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="11812e23-f7ae-415d-a2f0-7803b69c9655" name="192.168.0.6">
-        <fileTransfer rootFolder="/home/isseo/project/nucs" accessType="SFTP" host="192.168.0.6" port="22" sshConfigId="3f4b499d-29b0-4715-8f93-44fa042d82af" sshConfig="isseo@192.168.0.6:22 key" keyPair="true">
+        <fileTransfer rootFolder="/home/isseo/projects/nucs" accessType="SFTP" host="192.168.0.6" port="22" sshConfigId="3f4b499d-29b0-4715-8f93-44fa042d82af" sshConfig="isseo@192.168.0.6:22 key" keyPair="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
