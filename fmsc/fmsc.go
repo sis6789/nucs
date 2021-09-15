@@ -6,17 +6,17 @@ type FMSC struct {
 	File      string `bson:"f"`
 	Molecular string `bson:"m"`
 	Side      string `bson:"s"`
-	Count     int    `bson:"c"`
+	Read      int    `bson:"r"`
 	Ordinal   []int  `bson:"o"`
 }
 
 // NewFMSC 새 FMSC 구조를 반환한다.
-func NewFMSC(file string, molecular string, side string, count int, ordinal int) FMSC {
+func NewFMSC(file string, molecular string, side string, read int, ordinal int) FMSC {
 	return FMSC{
 		File:      file,
 		Molecular: molecular,
 		Side:      side,
-		Count:     count,
+		Read:      read,
 		Ordinal:   []int{ordinal},
 	}
 }
@@ -59,9 +59,9 @@ func SortFMSC(sliceFMSC []FMSC) {
 			return true
 		case sliceFMSC[i].Side > sliceFMSC[j].Side:
 			return false
-		case sliceFMSC[i].Count < sliceFMSC[j].Count:
+		case sliceFMSC[i].Read < sliceFMSC[j].Read:
 			return true
-		case sliceFMSC[i].Count > sliceFMSC[j].Count:
+		case sliceFMSC[i].Read > sliceFMSC[j].Read:
 			return false
 		default:
 			return false
@@ -101,16 +101,16 @@ func RemoveSimilarMolecular(sliceFMSC *[]FMSC) {
 	}
 
 	sort.Slice(ordered, func(i, j int) bool {
-		return ordered[i].s.Count < ordered[j].s.Count
+		return ordered[i].s.Read < ordered[j].s.Read
 	})
 
 	// 한 개만 존재하는 것들을 상위의 유사한 FMS에 추가하고 삭제한다.
-	for ix := 0; ix < len(ordered) && ordered[ix].s.Count == 1; ix++ {
-		for jx := len(ordered) - 1; jx > ix && ordered[jx].s.Count > 1; jx-- {
+	for ix := 0; ix < len(ordered) && ordered[ix].s.Read == 1; ix++ {
+		for jx := len(ordered) - 1; jx > ix && ordered[jx].s.Read > 1; jx-- {
 			if isLikely(ordered[ix].s.Molecular, ordered[jx].s.Molecular, 1) {
 				if ordered[ix].s.Side == ordered[jx].s.Side {
 					// 유사한 molecular-side에 추가한다. 그리고 삭제 마크를 한다.
-					ordered[jx].s.Count += ordered[ix].s.Count
+					ordered[jx].s.Read += ordered[ix].s.Read
 					ordered[ix].remove = true
 					break
 				}
