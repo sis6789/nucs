@@ -17,8 +17,8 @@ func SortFile(fileName string, keyList ...string) {
 	var sortInFile, sortOutFile, sortErrFile *os.File
 	folder := filepath.Dir(fileName)
 	sortInFn := fileName
-	sortOutFn := filepath.Join(folder, uuid.NewString()+"-so.txt")
-	sortErrFn := filepath.Join(folder, uuid.NewString()+"-se.txt")
+	sortOutFn := filepath.Join(folder, "so_"+uuid.NewString()+".txt")
+	sortErrFn := filepath.Join(folder, "se_"+uuid.NewString()+".txt")
 	if sortInFile, err = os.Open(sortInFn); err != nil {
 		log.Fatalln(err)
 	}

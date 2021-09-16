@@ -1,6 +1,7 @@
 package sort_multi_files
 
 import (
+	"github.com/google/uuid"
 	"io/ioutil"
 	"log"
 	"os"
@@ -51,8 +52,8 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 	}()
 
 	sortInFn := filepath.Join(folder, fileName)
-	sortOutFn := filepath.Join(folder, fileName+".tempso")
-	sortErrFn := filepath.Join(folder, fileName+".tempse")
+	sortOutFn := filepath.Join(folder, "so_"+uuid.NewString()+".txt")
+	sortErrFn := filepath.Join(folder, "se_"+uuid.NewString()+".txt")
 
 	sortInFile, err := os.Open(sortInFn)
 	if err != nil {
