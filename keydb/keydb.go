@@ -18,10 +18,11 @@ var mapCollection map[string]*mongo.Collection
 var basicColNames []string
 
 func Connect(access string, db string, collectionName ...string) {
-	mongodbAccess = access
-	dbName = db
-	basicColNames = collectionName
 	if mongoClient == nil {
+		mapCollection = make(map[string]*mongo.Collection)
+		mongodbAccess = access
+		dbName = db
+		basicColNames = collectionName
 		clientOptions := options.Client().ApplyURI(mongodbAccess)
 		if client, err := mongo.Connect(myContext, clientOptions); err != nil {
 			log.Fatalln(err)
@@ -31,13 +32,21 @@ func Connect(access string, db string, collectionName ...string) {
 		if err = mongoClient.Ping(myContext, nil); err != nil {
 			log.Fatalln(err)
 		}
+		setBaseCollection()
+	} else {
+		log.Println("connected already", mongodbAccess, dbName)
 	}
-	setBaseCollection()
+}
+
+func ReConnect(access string, db string, collectionName ...string) {
+	if mongoClient != nil {
+		_ = mongoClient.Disconnect(context.TODO())
+	}
+	Connect(access, db, collectionName...)
 }
 
 func setBaseCollection() {
 	// base collection list
-	mapCollection = make(map[string]*mongo.Collection)
 	for _, name := range basicColNames {
 		col := mongoClient.Database(dbName).Collection(name)
 		mapCollection[name] = col
@@ -86,9 +95,9 @@ func ResetCol(name string) *mongo.Collection {
 func Index(collectionName string, fieldName ...string) {
 	collection := Col(collectionName)
 	var vFalse = false
-	var keyDef bson.M
+	var keyDef bson.D
 	for _, kf := range fieldName {
-		keyDef[kf] = 1
+		keyDef = append(keyDef, bson.E{Key: kf, Value: 1})
 	}
 	model := mongo.IndexModel{
 		Keys: keyDef,
