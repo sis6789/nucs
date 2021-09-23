@@ -29,21 +29,17 @@ func NewBulk(collection string, interval int) *BulkBlock {
 }
 
 func (x *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
-	if len(x.accumulatedAction) > x.limit {
+	if len(x.accumulatedAction) >= x.limit {
 		x.Apply()
-		x.accumulatedAction = []mongo.WriteModel{model}
-	} else {
-		x.accumulatedAction = append(x.accumulatedAction, model)
 	}
+	x.accumulatedAction = append(x.accumulatedAction, model)
 }
 
 func (x *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
-	if len(x.accumulatedAction) > x.limit {
+	if len(x.accumulatedAction) >= x.limit {
 		x.Apply()
-		x.accumulatedAction = []mongo.WriteModel{model}
-	} else {
-		x.accumulatedAction = append(x.accumulatedAction, model)
 	}
+	x.accumulatedAction = append(x.accumulatedAction, model)
 }
 
 func (x *BulkBlock) Apply() {
