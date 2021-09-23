@@ -15,6 +15,9 @@ type BulkBlock struct {
 	accumulatedAction []mongo.WriteModel
 	modify            int
 	match             int
+	insert            int
+	upsert            int
+	delete            int
 }
 
 func NewBulk(collection string, interval int) *BulkBlock {
@@ -55,8 +58,12 @@ func (x *BulkBlock) Apply() {
 	x.accumulatedAction = nil
 	x.modify += int(result.ModifiedCount)
 	x.match += int(result.MatchedCount)
+	x.insert += int(result.InsertedCount)
+	x.upsert += int(result.UpsertedCount)
+	x.delete += int(result.DeletedCount)
 }
 
 func (x *BulkBlock) String() string {
-	return fmt.Sprintf("match:%d modify:%d", x.match, x.modify)
+	return fmt.Sprintf("insert:%d match:%d modify:%d upsert:%d delete:%d",
+		x.insert, x.match, x.modify, x.upsert, x.delete)
 }
