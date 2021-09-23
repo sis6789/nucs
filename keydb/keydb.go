@@ -40,7 +40,7 @@ func Connect(access string, db string, collectionName ...string) {
 
 func ReConnect(access string, db string, collectionName ...string) {
 	if mongoClient != nil {
-		_ = mongoClient.Disconnect(context.TODO())
+		_ = mongoClient.Disconnect(context.Background())
 	}
 	Connect(access, db, collectionName...)
 }

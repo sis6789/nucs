@@ -49,7 +49,7 @@ func (x *BulkBlock) Apply() {
 		return
 	}
 	var result *mongo.BulkWriteResult
-	if result, err = x.collection.BulkWrite(context.TODO(), x.accumulatedAction, nonOrderedOpt); err != nil {
+	if result, err = x.collection.BulkWrite(context.Background(), x.accumulatedAction, nonOrderedOpt); err != nil {
 		log.Fatalln(err)
 	}
 	x.accumulatedAction = nil
