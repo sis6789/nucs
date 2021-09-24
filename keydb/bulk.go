@@ -60,6 +60,6 @@ func (x *BulkBlock) Apply() {
 }
 
 func (x *BulkBlock) String() string {
-	return fmt.Sprintf("insert:%d match:%d modify:%d upsert:%d delete:%d",
+	return fmt.Sprintf("%s(ins:%d mat:%d mod:%d ups:%d del:%d)", x.collectionName,
 		x.insert, x.match, x.modify, x.upsert, x.delete)
 }
