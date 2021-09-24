@@ -3,6 +3,7 @@ package json_config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sis6789/nucs/caller"
 	"io/ioutil"
 	"log"
 	"os"
@@ -22,7 +23,7 @@ func Map() *map[string]interface{} {
 func Decode(s []byte) {
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(s, &tM); err != nil {
-		log.Println(err)
+		log.Println(caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -47,7 +48,7 @@ func Read(fileName string) {
 	}
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(fBytes, &tM); err != nil {
-		log.Println(err)
+		log.Println(caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -59,11 +60,11 @@ func Write(fileName string) {
 	var fBytes []byte
 	fBytes, err = json.Marshal(jsonConfig)
 	if err != nil {
-		log.Println(err)
+		log.Println(caller.Caller(), err)
 	}
 	err = ioutil.WriteFile(fileName, fBytes, 0777)
 	if err != nil {
-		log.Println(err)
+		log.Println(caller.Caller(), err)
 	}
 }
 
@@ -182,32 +183,32 @@ func File(folder, name, mode string) *os.File {
 		dir = filepath.Join(jsonConfig["work_dir"].(string), folder)
 	}
 	if err = os.MkdirAll(dir, 0777); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	fullPath := filepath.Join(dir, name)
 	switch mode {
 	case "c", "create":
 		f, err = os.Create(fullPath)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		return f
 	case "a", "append":
 		f, err = os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		return f
 	case "r", "raad":
 		f, err = os.Open(fullPath)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		return f
 	case "rw", "readwrite":
 		f, err = os.OpenFile(fullPath, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		return f
 	}

@@ -2,6 +2,7 @@ package genome
 
 import (
 	"fmt"
+	"github.com/sis6789/nucs/caller"
 	"log"
 	"regexp"
 	"sort"
@@ -206,7 +207,7 @@ func (r *NucLine) ParseLine(line string) *NucLine {
 	_, err := fmt.Sscanf(line, "%d %d %d %d %d %d %d %d %s",
 		&r.Gchr, &r.Gpos, &r.Fms, &r.Side, &r.CountRead, &r.Qid, &r.Qstart, &r.Qpos, &r.Seq)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	return r
 }

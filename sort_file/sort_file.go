@@ -2,6 +2,7 @@ package sort_file
 
 import (
 	"github.com/google/uuid"
+	"github.com/sis6789/nucs/caller"
 	"log"
 	"os"
 	"os/exec"
@@ -20,13 +21,13 @@ func SortFile(fileName string, keyList ...string) {
 	sortOutFn := filepath.Join(folder, "so_"+uuid.NewString()+".txt")
 	sortErrFn := filepath.Join(folder, "se_"+uuid.NewString()+".txt")
 	if sortInFile, err = os.Open(sortInFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if sortOutFile, err = os.Create(sortOutFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if sortErrFile, err = os.Create(sortErrFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 
 	var cmdPath string
@@ -34,14 +35,14 @@ func SortFile(fileName string, keyList ...string) {
 	if runtime.GOOS == "windows" {
 		cmdPath, err = exec.LookPath("wsl")
 		if err != nil {
-			log.Fatalln("No sort command", err)
+			log.Fatalln(caller.Caller(), err)
 			return
 		}
 		sortOrder = []string{cmdPath, "sort"}
 	} else {
 		cmdPath, err = exec.LookPath("sort")
 		if err != nil {
-			log.Fatalln("No sort command", err)
+			log.Fatalln(caller.Caller(), err)
 			return
 		}
 		sortOrder = []string{cmdPath}
@@ -61,7 +62,7 @@ func SortFile(fileName string, keyList ...string) {
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()
-		log.Fatalln("sort start failed.", fileName)
+		log.Fatalln(caller.Caller(), fileName)
 	}
 	// wait end of sort
 	if endErr := cmd.Wait(); endErr != nil {
@@ -69,30 +70,30 @@ func SortFile(fileName string, keyList ...string) {
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()
-		log.Fatalln("sort end error", fileName)
+		log.Fatalln(caller.Caller(), fileName)
 	}
 	// close
 	if err = sortInFile.Close(); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if err = sortOutFile.Sync(); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	} else if err = sortOutFile.Close(); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if err = sortErrFile.Sync(); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	} else if err = sortErrFile.Close(); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	// remove error file
 	if err = os.Remove(sortErrFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if err = os.Remove(sortInFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	if err = os.Rename(sortOutFn, sortInFn); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 }

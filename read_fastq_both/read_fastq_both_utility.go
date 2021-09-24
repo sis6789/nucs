@@ -1,6 +1,7 @@
 package read_fastq_both
 
 import (
+	"github.com/sis6789/nucs/caller"
 	"io/ioutil"
 	"log"
 	"reflect"
@@ -29,7 +30,7 @@ func PairList(path string, fileNamePattern string) []string {
 	// get list
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	var fnList []string
 	var fnPair = ""

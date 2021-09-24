@@ -2,6 +2,7 @@ package keydb
 
 import (
 	"context"
+	"github.com/sis6789/nucs/caller"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,12 +26,12 @@ func Connect(access string, db string, collectionName ...string) {
 		basicColNames = collectionName
 		clientOptions := options.Client().ApplyURI(mongodbAccess)
 		if client, err := mongo.Connect(myContext, clientOptions); err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		} else {
 			mongoClient = client
 		}
 		if err = mongoClient.Ping(myContext, nil); err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		setBaseCollection()
 	} else {
@@ -57,7 +58,7 @@ func Col(name string) *mongo.Collection {
 	if collection, exist := mapCollection[name]; exist {
 		return collection
 	} else {
-		log.Fatalln("undefined collection name", name)
+		log.Fatalln(caller.Caller(), name)
 		return nil
 	}
 }
@@ -74,7 +75,7 @@ func Add(name string) *mongo.Collection {
 func Drop(name string) {
 	if col, exist := mapCollection[name]; exist {
 		if err = col.Drop(myContext); err != nil {
-			log.Fatalln(err)
+			log.Fatalln(caller.Caller(), err)
 		}
 		delete(mapCollection, name)
 	}
@@ -82,7 +83,7 @@ func Drop(name string) {
 
 func DropDb() {
 	if err = mongoClient.Database(dbName).Drop(myContext); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	setBaseCollection()
 }
@@ -106,6 +107,6 @@ func Index(collectionName string, fieldName ...string) {
 		},
 	}
 	if _, err := collection.Indexes().CreateOne(myContext, model); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 }

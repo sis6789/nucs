@@ -3,6 +3,7 @@ package keydb
 import (
 	"context"
 	"fmt"
+	"github.com/sis6789/nucs/caller"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -49,7 +50,7 @@ func (x *BulkBlock) Apply() {
 	}
 	var result *mongo.BulkWriteResult
 	if result, err = x.collection.BulkWrite(context.Background(), x.accumulatedAction, nonOrderedOpt); err != nil {
-		log.Fatalln(err)
+		log.Fatalln(caller.Caller(), err)
 	}
 	x.accumulatedAction = nil
 	x.modify += int(result.ModifiedCount)
