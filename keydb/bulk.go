@@ -61,6 +61,7 @@ func (x *BulkBlock) Apply() {
 
 func (x *BulkBlock) Close() {
 	x.Apply()
+	log.Println(x)
 }
 
 func (x *BulkBlock) String() string {
