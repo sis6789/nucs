@@ -17,9 +17,10 @@ type KeyDB struct {
 	mapCollection map[string]*mongo.Collection
 }
 
-func New() *KeyDB {
+func New(access string) *KeyDB {
 	var keyDB KeyDB
 	keyDB.myContext = context.Background()
+	keyDB.Connect(access)
 	return &keyDB
 }
 
