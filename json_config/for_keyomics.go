@@ -22,23 +22,23 @@ func KeyomicsBasic() {
 		Decode(linuxJson)
 	}
 
-	if _, exist := jsonConfig["root_dir"]; !exist {
-		jsonConfig["root_dir"], _ = homedir.Dir()
+	if _, exist := jsonConfig["rootDir"]; !exist {
+		jsonConfig["rootDir"], _ = homedir.Dir()
 	}
-	if _, exist := jsonConfig["job_title"]; !exist {
-		jsonConfig["job_title"] = time.Now().Format("20060102")
+	if _, exist := jsonConfig["jobTitle"]; !exist {
+		jsonConfig["jobTitle"] = time.Now().Format("20060102")
 	}
-	if _, exist := jsonConfig["run_name"]; !exist {
-		jsonConfig["run_name"] = time.Now().Format("20060102-1504")
+	if _, exist := jsonConfig["runName"]; !exist {
+		jsonConfig["runName"] = time.Now().Format("20060102-1504")
 	}
-	if _, exist := jsonConfig["fastq_query_terminator"]; exist {
-		jsonConfig["fastq_query_terminator_length"] = len(jsonConfig["fastq_query_terminator"].(string))
+	if _, exist := jsonConfig["fastqQueryTerminator"]; exist {
+		jsonConfig["fastqQueryTerminatorLength"] = len(jsonConfig["fastqQueryTerminator"].(string))
 	} else {
-		jsonConfig["fastq_query_terminator_length"] = 0
+		jsonConfig["fastqQueryTerminatorLength"] = 0
 	}
-	jsonConfig["work_dir"] = filepath.Join(jsonConfig["root_dir"].(string),
-		jsonConfig["job_title"].(string), jsonConfig["run_name"].(string))
-	jsonConfig["log_dir"] = filepath.Join(jsonConfig["work_dir"].(string), "log")
-	jsonConfig["save_dir"] = filepath.Join(jsonConfig["work_dir"].(string), "save")
-	jsonConfig["temp_dir"] = filepath.Join(jsonConfig["work_dir"].(string), "temp")
+	jsonConfig["workDir"] = filepath.Join(jsonConfig["rootDir"].(string),
+		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string))
+	jsonConfig["logDir"] = filepath.Join(jsonConfig["workDir"].(string), "log")
+	jsonConfig["saveDir"] = filepath.Join(jsonConfig["workDir"].(string), "save")
+	jsonConfig["tempDir"] = filepath.Join(jsonConfig["workDir"].(string), "temp")
 }

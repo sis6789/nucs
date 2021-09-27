@@ -180,7 +180,7 @@ func File(folder, name, mode string) *os.File {
 	var f *os.File
 	dir := folder
 	if !filepath.IsAbs(folder) {
-		dir = filepath.Join(jsonConfig["work_dir"].(string), folder)
+		dir = filepath.Join(jsonConfig["workDir"].(string), folder)
 	}
 	if err = os.MkdirAll(dir, 0777); err != nil {
 		log.Fatalln(caller.Caller(), err)

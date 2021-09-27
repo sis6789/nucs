@@ -1,11 +1,11 @@
 {
   "fastq_dir": "D:/keyomics_test/fastq",
-  "root_dir": "D:/keyomics_test",
+  "rootDir": "D:/keyomics_test",
   "blast_db": "D:/Utility/NCBI/db/hg38",
   "chromosome_data_dir": "D:/HumanGenome",
   "fastq_file_pattern": "^.+fq$",
   "fastq_query_examine": "(//w{7,12})(CAGCTG([AC])CGTCAGTCT)(//w+)$",
-  "fastq_query_terminator": "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC",
+  "fastqQueryTerminator": "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC",
   "mongodb_access": "mongodb://localhost:27017",
   "blast_task_count": 200,
   "blast_task_cpu_count": 4,
