@@ -3,10 +3,12 @@ package keydb2
 import (
 	"context"
 	"fmt"
-	"github.com/sis6789/nucs/caller"
+	"log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
+
+	"github.com/sis6789/nucs/caller"
 )
 
 type BulkBlock struct {
@@ -24,50 +26,50 @@ type BulkBlock struct {
 }
 
 func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock {
-	var y BulkBlock
-	y.dbName = dbName
-	y.collectionName = collectionName
-	y.collection = x.Col(dbName, collectionName)
-	y.limit = interval
-	return &y
+	var b BulkBlock
+	b.dbName = dbName
+	b.collectionName = collectionName
+	b.collection = x.Col(dbName, collectionName)
+	b.limit = interval
+	return &b
 }
 
-func (x *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
-	if len(x.accumulatedAction) >= x.limit {
-		x.Apply()
+func (b *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
+	if len(b.accumulatedAction) >= b.limit {
+		b.Apply()
 	}
-	x.accumulatedAction = append(x.accumulatedAction, model)
+	b.accumulatedAction = append(b.accumulatedAction, model)
 }
 
-func (x *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
-	if len(x.accumulatedAction) >= x.limit {
-		x.Apply()
+func (b *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
+	if len(b.accumulatedAction) >= b.limit {
+		b.Apply()
 	}
-	x.accumulatedAction = append(x.accumulatedAction, model)
+	b.accumulatedAction = append(b.accumulatedAction, model)
 }
 
-func (x *BulkBlock) Apply() {
+func (b *BulkBlock) Apply() {
 	var nonOrderedOpt = options.BulkWrite().SetOrdered(false)
-	if len(x.accumulatedAction) == 0 {
+	if len(b.accumulatedAction) == 0 {
 		return
 	}
 	var result *mongo.BulkWriteResult
-	if result, x.err = x.collection.BulkWrite(context.Background(), x.accumulatedAction, nonOrderedOpt); x.err != nil {
-		log.Fatalln(caller.Caller(), x.err)
+	if result, b.err = b.collection.BulkWrite(context.Background(), b.accumulatedAction, nonOrderedOpt); b.err != nil {
+		log.Fatalln(caller.Caller(), b.err)
 	}
-	x.accumulatedAction = nil
-	x.modify += int(result.ModifiedCount)
-	x.match += int(result.MatchedCount)
-	x.insert += int(result.InsertedCount)
-	x.upsert += int(result.UpsertedCount)
-	x.delete += int(result.DeletedCount)
+	b.accumulatedAction = nil
+	b.modify += int(result.ModifiedCount)
+	b.match += int(result.MatchedCount)
+	b.insert += int(result.InsertedCount)
+	b.upsert += int(result.UpsertedCount)
+	b.delete += int(result.DeletedCount)
 }
 
-func (x *BulkBlock) Close() {
-	x.Apply()
+func (b *BulkBlock) Close() {
+	b.Apply()
 }
 
-func (x *BulkBlock) String() string {
-	return fmt.Sprintf("%s(ins:%d mat:%d mod:%d ups:%d del:%d)", x.collectionName,
-		x.insert, x.match, x.modify, x.upsert, x.delete)
+func (b *BulkBlock) String() string {
+	return fmt.Sprintf("%s-%s(ins:%d mat:%d mod:%d ups:%d del:%d)", b.dbName, b.collectionName,
+		b.insert, b.match, b.modify, b.upsert, b.delete)
 }

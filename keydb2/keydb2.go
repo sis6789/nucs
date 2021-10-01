@@ -2,12 +2,14 @@ package keydb2
 
 import (
 	"context"
-	"github.com/sis6789/nucs/caller"
+	"log"
+	"sync"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"sync"
+
+	"github.com/sis6789/nucs/caller"
 )
 
 var dbMap = make(map[string]*KeyDB)
@@ -19,37 +21,43 @@ type KeyDB struct {
 	mongodbAccess string
 	mongoClient   *mongo.Client //= nil
 	mapCollection map[string]*mongo.Collection
+	newCount      int
 }
 
 func New(access string) *KeyDB {
 
 	mutex.Lock()
-	prevCol, exist := dbMap[access]
+	savedKeyDB, exist := dbMap[access]
 	mutex.Unlock()
 	if exist {
-		return prevCol
+		savedKeyDB.newCount++
+		return savedKeyDB
 	}
 
-	var keyDB KeyDB
-	keyDB.myContext = context.Background()
-	keyDB.Connect(access)
+	var newKeyDB KeyDB
+	newKeyDB.myContext = context.Background()
+	newKeyDB.Connect(access)
+	newKeyDB.newCount = 1
 
 	mutex.Lock()
-	dbMap[access] = &keyDB
+	dbMap[access] = &newKeyDB
 	mutex.Unlock()
 
-	return &keyDB
+	return &newKeyDB
 }
 
 func (x *KeyDB) Close() {
 	if x.mongoClient == nil {
 		return
 	}
-	if x.err = x.mongoClient.Disconnect(x.myContext); x.err != nil {
-		log.Fatalln(x.err)
+	x.newCount--
+	if x.newCount < 1 {
+		if x.err = x.mongoClient.Disconnect(x.myContext); x.err != nil {
+			log.Fatalln(x.err)
+		}
+		x.mongoClient = nil
+		x.mapCollection = nil
 	}
-	x.mongoClient = nil
-	x.mapCollection = nil
 }
 
 func (x *KeyDB) Connect(access string) {
@@ -66,13 +74,6 @@ func (x *KeyDB) Connect(access string) {
 			log.Fatalln(caller.Caller(), x.err)
 		}
 	}
-}
-
-func (x *KeyDB) ReConnect(access string) {
-	if x.mongoClient != nil {
-		_ = x.mongoClient.Disconnect(x.myContext)
-	}
-	x.Connect(access)
 }
 
 func (x *KeyDB) Col(dbName, collectionName string) *mongo.Collection {
