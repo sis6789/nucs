@@ -3,6 +3,7 @@ package keydb2
 import (
 	"context"
 	"log"
+	"strings"
 	"sync"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -110,6 +111,12 @@ func (x *KeyDB) Drop(dbName, collectionName string) {
 func (x *KeyDB) DropDb(dbName string) {
 	if x.err = x.mongoClient.Database(dbName).Drop(x.myContext); x.err != nil {
 		log.Fatalln(caller.Caller(), x.err)
+	}
+	for k := range x.mapCollection {
+		dbCol := strings.Split(k, "::")
+		if dbCol[0] == dbName {
+			delete(x.mapCollection, k)
+		}
 	}
 }
 
