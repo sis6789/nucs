@@ -7,7 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"sync"
 )
+
+var dbMap = make(map[string]*KeyDB)
+var mutex sync.Mutex
 
 type KeyDB struct {
 	myContext     context.Context //= context.Background()
@@ -18,9 +22,22 @@ type KeyDB struct {
 }
 
 func New(access string) *KeyDB {
+
+	mutex.Lock()
+	prevCol, exist := dbMap[access]
+	mutex.Unlock()
+	if exist {
+		return prevCol
+	}
+
 	var keyDB KeyDB
 	keyDB.myContext = context.Background()
 	keyDB.Connect(access)
+
+	mutex.Lock()
+	dbMap[access] = &keyDB
+	mutex.Unlock()
+
 	return &keyDB
 }
 
