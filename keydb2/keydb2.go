@@ -22,23 +22,22 @@ type KeyDB struct {
 	mongodbAccess string
 	mongoClient   *mongo.Client //= nil
 	mapCollection map[string]*mongo.Collection
-	newCount      int
 }
 
+// New - prepare mongodb access
 func New(access string) *KeyDB {
 
 	mutex.Lock()
 	savedKeyDB, exist := dbMap[access]
 	mutex.Unlock()
 	if exist {
-		savedKeyDB.newCount++
 		return savedKeyDB
 	}
 
 	var newKeyDB KeyDB
 	newKeyDB.myContext = context.Background()
-	newKeyDB.Connect(access)
-	newKeyDB.newCount = 1
+	newKeyDB.connect(access)
+	newKeyDB.mapCollection = make(map[string]*mongo.Collection)
 
 	mutex.Lock()
 	dbMap[access] = &newKeyDB
@@ -47,21 +46,13 @@ func New(access string) *KeyDB {
 	return &newKeyDB
 }
 
-func (x *KeyDB) Close() {
-	if x.mongoClient == nil {
-		return
-	}
-	x.newCount--
-	if x.newCount < 1 {
-		if x.err = x.mongoClient.Disconnect(x.myContext); x.err != nil {
-			log.Fatalln(x.err)
-		}
-		x.mongoClient = nil
-		x.mapCollection = nil
-	}
+// Open - prepare mongodb access
+func Open(access string) *KeyDB {
+	return New(access)
 }
 
-func (x *KeyDB) Connect(access string) {
+// connect - access mongodb server and check server availability.
+func (x *KeyDB) connect(access string) {
 	if x.mongoClient == nil {
 		x.mapCollection = make(map[string]*mongo.Collection)
 		x.mongodbAccess = access
@@ -77,6 +68,7 @@ func (x *KeyDB) Connect(access string) {
 	}
 }
 
+// Col - return collection, if not exist make collection and return it.
 func (x *KeyDB) Col(dbName, collectionName string) *mongo.Collection {
 	dbCol := dbName + "::" + collectionName
 	if collection, exist := x.mapCollection[dbCol]; exist {
@@ -88,6 +80,7 @@ func (x *KeyDB) Col(dbName, collectionName string) *mongo.Collection {
 	}
 }
 
+// Add - make new collection, if already exist delete it and make new collection.
 func (x *KeyDB) Add(dbName, collectionName string) *mongo.Collection {
 	dbCol := dbName + "::" + collectionName
 	if _, exist := x.mapCollection[dbCol]; exist {
@@ -98,16 +91,20 @@ func (x *KeyDB) Add(dbName, collectionName string) *mongo.Collection {
 	return col
 }
 
-func (x *KeyDB) Drop(dbName, collectionName string) {
-	dbCol := dbName + "::" + collectionName
-	if col, exist := x.mapCollection[dbCol]; exist {
-		if x.err = col.Drop(x.myContext); x.err != nil {
-			log.Fatalln(caller.Caller(), x.err)
+// Drop - delete collection
+func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
+	for _, colName := range collectionNames {
+		dbCol := dbName + "::" + colName
+		if col, exist := x.mapCollection[dbCol]; exist {
+			if x.err = col.Drop(x.myContext); x.err != nil {
+				log.Fatalln(caller.Caller(), x.err)
+			}
+			delete(x.mapCollection, dbCol)
 		}
-		delete(x.mapCollection, dbCol)
 	}
 }
 
+// DropDb - Delete DB and associated collection.
 func (x *KeyDB) DropDb(dbName string) {
 	if x.err = x.mongoClient.Database(dbName).Drop(x.myContext); x.err != nil {
 		log.Fatalln(caller.Caller(), x.err)
@@ -120,11 +117,13 @@ func (x *KeyDB) DropDb(dbName string) {
 	}
 }
 
+// ResetCol - Delete collection and remake it.
 func (x *KeyDB) ResetCol(dbName, CollectionName string) *mongo.Collection {
 	x.Drop(dbName, CollectionName)
 	return x.Add(dbName, CollectionName)
 }
 
+// Index - add index definition. Specify key elements as repeated string.
 func (x *KeyDB) Index(dbName, collectionName string, fieldName ...string) {
 	collection := x.Col(dbName, collectionName)
 	var vFalse = false

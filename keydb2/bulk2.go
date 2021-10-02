@@ -25,6 +25,7 @@ type BulkBlock struct {
 	err               error
 }
 
+// NewBulk - prepare bulk operation
 func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock {
 	var b BulkBlock
 	b.dbName = dbName
@@ -34,6 +35,7 @@ func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock 
 	return &b
 }
 
+// InsertOne - append action InsertOne.
 func (b *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
 	if len(b.accumulatedAction) >= b.limit {
 		b.Apply()
@@ -41,6 +43,7 @@ func (b *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
 	b.accumulatedAction = append(b.accumulatedAction, model)
 }
 
+// UpdateOne - append action UpdateOne.
 func (b *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
 	if len(b.accumulatedAction) >= b.limit {
 		b.Apply()
@@ -48,6 +51,7 @@ func (b *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
 	b.accumulatedAction = append(b.accumulatedAction, model)
 }
 
+// Apply - send accumulated request.
 func (b *BulkBlock) Apply() {
 	var nonOrderedOpt = options.BulkWrite().SetOrdered(false)
 	if len(b.accumulatedAction) == 0 {
@@ -65,10 +69,12 @@ func (b *BulkBlock) Apply() {
 	b.delete += int(result.DeletedCount)
 }
 
+// Close - send remain accumulated request.
 func (b *BulkBlock) Close() {
 	b.Apply()
 }
 
+// String - status message
 func (b *BulkBlock) String() string {
 	return fmt.Sprintf("%s-%s(ins:%d mat:%d mod:%d ups:%d del:%d)", b.dbName, b.collectionName,
 		b.insert, b.match, b.modify, b.upsert, b.delete)
