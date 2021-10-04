@@ -46,6 +46,18 @@ func New(access string) *KeyDB {
 	return &newKeyDB
 }
 
+// GoodBye - disconnect all connection
+func GoodBye() {
+	for k, kdb := range dbMap {
+		if kdb.err = kdb.mongoClient.Disconnect(kdb.myContext); kdb.err != nil {
+			log.Println(kdb.mongodbAccess, kdb.err)
+		} else {
+			log.Println("disconnect", kdb.mongodbAccess, kdb.err)
+		}
+		delete(dbMap, k)
+	}
+}
+
 // Open - prepare mongodb access
 func Open(access string) *KeyDB {
 	return New(access)

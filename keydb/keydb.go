@@ -43,3 +43,7 @@ func ResetCol(name string) *mongo.Collection {
 func Index(collectionName string, fieldName ...string) {
 	dKDB2.Index(dbName, collectionName, fieldName...)
 }
+
+func GoodBye() {
+	keydb2.GoodBye()
+}
