@@ -92,5 +92,4 @@ func (x *OldBlast) Apply() {
 // Close - 모든 처리를 종료한다.
 func (x *OldBlast) Close() {
 	x.bulk.Close()
-	x.client.Close()
 }
