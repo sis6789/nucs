@@ -26,7 +26,7 @@ func (x *GoSubResult) Close() {
 	defer func() {
 		v := recover()
 		if v != nil {
-			log.Println("close on closed channel")
+			log.Print("close on closed channel")
 		}
 	}()
 	close(x.wChan)
@@ -37,7 +37,7 @@ func (x *GoSubResult) Send(v interface{}) {
 	defer func() {
 		v := recover()
 		if v != nil {
-			log.Println("send on closed channel")
+			log.Print("send on closed channel")
 		}
 	}()
 	x.wChan <- v

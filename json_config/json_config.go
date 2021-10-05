@@ -23,7 +23,7 @@ func Map() *map[string]interface{} {
 func Decode(s []byte) {
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(s, &tM); err != nil {
-		log.Println(caller.Caller(), err)
+		log.Print(caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -48,7 +48,7 @@ func Read(fileName string) {
 	}
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(fBytes, &tM); err != nil {
-		log.Println(caller.Caller(), err)
+		log.Print(caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -60,11 +60,11 @@ func Write(fileName string) {
 	var fBytes []byte
 	fBytes, err = json.Marshal(jsonConfig)
 	if err != nil {
-		log.Println(caller.Caller(), err)
+		log.Print(caller.Caller(), err)
 	}
 	err = ioutil.WriteFile(fileName, fBytes, 0777)
 	if err != nil {
-		log.Println(caller.Caller(), err)
+		log.Print(caller.Caller(), err)
 	}
 }
 

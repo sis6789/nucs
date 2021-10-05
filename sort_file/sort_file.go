@@ -58,7 +58,7 @@ func SortFile(fileName string, keyList ...string) {
 	}
 	// invoke sort
 	if startErr := cmd.Start(); startErr != nil {
-		log.Println(startErr)
+		log.Print(startErr)
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()
@@ -66,7 +66,7 @@ func SortFile(fileName string, keyList ...string) {
 	}
 	// wait end of sort
 	if endErr := cmd.Wait(); endErr != nil {
-		log.Println(endErr)
+		log.Print(endErr)
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()

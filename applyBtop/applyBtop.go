@@ -57,7 +57,7 @@ func Complement(slice interface{}) {
 			Complement(values[ix])
 		}
 	default:
-		log.Println("Invalid type complement")
+		log.Print("Invalid type complement")
 	}
 }
 
