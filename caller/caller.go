@@ -7,7 +7,7 @@ import (
 )
 
 func Caller() string {
-	_, file, line, ok := runtime.Caller(1)
+	_, file, line, ok := runtime.Caller(2)
 	if ok {
 		baseName := filepath.Base(file)
 		return fmt.Sprintf("%s:%d", baseName, line)
