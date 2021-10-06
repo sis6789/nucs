@@ -1,17 +1,22 @@
 package caller
 
 import (
-	"fmt"
 	"path/filepath"
 	"runtime"
+	"strconv"
 )
 
 func Caller() string {
-	_, file, line, ok := runtime.Caller(2)
-	if ok {
-		baseName := filepath.Base(file)
-		return fmt.Sprintf("%s:%d", baseName, line)
-	} else {
-		return "unknown:-1"
+	ix := 2
+	stack := ""
+	for {
+		_, file, line, ok := runtime.Caller(ix)
+		if ok {
+			stack += "<" + filepath.Base(file) + ":" + strconv.Itoa(line)
+			ix++
+		} else {
+			break
+		}
 	}
+	return stack
 }
