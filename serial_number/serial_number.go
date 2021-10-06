@@ -2,11 +2,13 @@ package serial_number
 
 import (
 	"log"
+	"sync"
 )
 
 type SerialNumber struct {
 	intChannel chan int
 	active     bool
+	mu         sync.Mutex
 }
 
 func New() *SerialNumber {
@@ -31,7 +33,10 @@ func (x *SerialNumber) generator() {
 
 func (x *SerialNumber) Next() int {
 	if x.active {
-		return <-x.intChannel
+		x.mu.Lock()
+		newSerial := <-x.intChannel
+		x.mu.Unlock()
+		return newSerial
 	} else {
 		log.Panicln("call after close.")
 		return -1
