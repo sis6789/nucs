@@ -84,11 +84,6 @@ func (x *OldBlast) SaveBulk() {
 	x.bulk.InsertOne(model1)
 }
 
-// Apply - 대기중인 자료를 저장한다.
-func (x *OldBlast) Apply() {
-	x.bulk.Apply()
-}
-
 // Close - 모든 처리를 종료한다.
 func (x *OldBlast) Close() {
 	x.bulk.Close()
