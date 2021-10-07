@@ -14,7 +14,7 @@ import (
 )
 
 var dbMap = make(map[string]*KeyDB)
-var mutex sync.Mutex
+var dbMapMutex sync.Mutex
 
 type KeyDB struct {
 	myContext     context.Context //= context.Background()
@@ -22,32 +22,38 @@ type KeyDB struct {
 	mongodbAccess string
 	mongoClient   *mongo.Client //= nil
 	mapCollection map[string]*mongo.Collection
+	colMapMutex   sync.Mutex
 }
 
 // New - prepare mongodb access
 func New(access string) *KeyDB {
-
-	mutex.Lock()
+	var err error
+	dbMapMutex.Lock()
 	savedKeyDB, exist := dbMap[access]
-	mutex.Unlock()
-	if exist {
-		return savedKeyDB
+	if !exist {
+		var newKeyDB KeyDB
+		newKeyDB.myContext = context.Background()
+		//newKeyDB.connect(access)
+		newKeyDB.mapCollection = make(map[string]*mongo.Collection)
+		newKeyDB.mongodbAccess = access
+		clientOptions := options.Client().ApplyURI(newKeyDB.mongodbAccess)
+		if newKeyDB.mongoClient, newKeyDB.err = mongo.Connect(newKeyDB.myContext, clientOptions); err != nil {
+			log.Fatalln(caller.Caller(), newKeyDB.err)
+		}
+		if newKeyDB.err = newKeyDB.mongoClient.Ping(newKeyDB.myContext, nil); newKeyDB.err != nil {
+			log.Fatalln(caller.Caller(), newKeyDB.err)
+		}
+		newKeyDB.mapCollection = make(map[string]*mongo.Collection)
+		dbMap[access] = &newKeyDB
+		savedKeyDB = &newKeyDB
 	}
-
-	var newKeyDB KeyDB
-	newKeyDB.myContext = context.Background()
-	newKeyDB.connect(access)
-	newKeyDB.mapCollection = make(map[string]*mongo.Collection)
-
-	mutex.Lock()
-	dbMap[access] = &newKeyDB
-	mutex.Unlock()
-
-	return &newKeyDB
+	dbMapMutex.Unlock()
+	return savedKeyDB
 }
 
 // GoodBye - disconnect all connection
 func GoodBye() {
+	dbMapMutex.Lock()
 	for k, kdb := range dbMap {
 		if kdb.err = kdb.mongoClient.Disconnect(kdb.myContext); kdb.err != nil {
 			log.Print(kdb.mongodbAccess, kdb.err)
@@ -56,55 +62,26 @@ func GoodBye() {
 		}
 		delete(dbMap, k)
 	}
-}
-
-// Open - prepare mongodb access
-func Open(access string) *KeyDB {
-	return New(access)
-}
-
-// connect - access mongodb server and check server availability.
-func (x *KeyDB) connect(access string) {
-	if x.mongoClient == nil {
-		x.mapCollection = make(map[string]*mongo.Collection)
-		x.mongodbAccess = access
-		clientOptions := options.Client().ApplyURI(x.mongodbAccess)
-		if client, err := mongo.Connect(x.myContext, clientOptions); err != nil {
-			log.Fatalln(caller.Caller(), err)
-		} else {
-			x.mongoClient = client
-		}
-		if x.err = x.mongoClient.Ping(x.myContext, nil); x.err != nil {
-			log.Fatalln(caller.Caller(), x.err)
-		}
-	}
+	dbMapMutex.Unlock()
 }
 
 // Col - return collection, if not exist make collection and return it.
 func (x *KeyDB) Col(dbName, collectionName string) *mongo.Collection {
 	dbCol := dbName + "::" + collectionName
-	if collection, exist := x.mapCollection[dbCol]; exist {
-		return collection
-	} else {
-		col := x.mongoClient.Database(dbName).Collection(collectionName)
-		x.mapCollection[dbCol] = col
-		return col
+	x.colMapMutex.Lock()
+	var collection *mongo.Collection
+	var exist bool
+	if collection, exist = x.mapCollection[dbCol]; !exist {
+		collection = x.mongoClient.Database(dbName).Collection(collectionName)
+		x.mapCollection[dbCol] = collection
 	}
-}
-
-// Add - make new collection, if already exist delete it and make new collection.
-func (x *KeyDB) Add(dbName, collectionName string) *mongo.Collection {
-	dbCol := dbName + "::" + collectionName
-	if _, exist := x.mapCollection[dbCol]; exist {
-		x.Drop(dbName, collectionName)
-	}
-	col := x.mongoClient.Database(dbName).Collection(collectionName)
-	x.mapCollection[dbCol] = col
-	return col
+	x.colMapMutex.Unlock()
+	return collection
 }
 
 // Drop - delete collection
 func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
+	x.colMapMutex.Lock()
 	for _, colName := range collectionNames {
 		dbCol := dbName + "::" + colName
 		if col, exist := x.mapCollection[dbCol]; exist {
@@ -114,10 +91,12 @@ func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
 			delete(x.mapCollection, dbCol)
 		}
 	}
+	x.colMapMutex.Unlock()
 }
 
 // DropDb - Delete DB and associated collection.
 func (x *KeyDB) DropDb(dbName string) {
+	x.colMapMutex.Lock()
 	if x.err = x.mongoClient.Database(dbName).Drop(x.myContext); x.err != nil {
 		log.Fatalln(caller.Caller(), x.err)
 	}
@@ -127,12 +106,7 @@ func (x *KeyDB) DropDb(dbName string) {
 			delete(x.mapCollection, k)
 		}
 	}
-}
-
-// ResetCol - Delete collection and remake it.
-func (x *KeyDB) ResetCol(dbName, CollectionName string) *mongo.Collection {
-	x.Drop(dbName, CollectionName)
-	return x.Add(dbName, CollectionName)
+	x.colMapMutex.Unlock()
 }
 
 // Index - add index definition. Specify key elements as repeated string.
