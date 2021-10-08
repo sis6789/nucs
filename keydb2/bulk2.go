@@ -35,7 +35,7 @@ func (b *BulkBlock) goRoutineMerger() {
 	for request := range b.goRoutineRequest {
 		if len(tempHolder) >= b.limit {
 			if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
-				log.Fatalln(caller.Caller(), b.err)
+				log.Fatalln(caller.Caller(), b, b.err)
 			}
 			b.modify += int(result.ModifiedCount)
 			b.match += int(result.MatchedCount)
@@ -46,15 +46,18 @@ func (b *BulkBlock) goRoutineMerger() {
 		}
 		tempHolder = append(tempHolder, request)
 	}
-	if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
-		log.Fatalln(caller.Caller(), b.err)
+	// sender close channel
+	if len(tempHolder) > 0 {
+		if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
+			log.Fatalln(caller.Caller(), b, b.err)
+		}
+		b.modify += int(result.ModifiedCount)
+		b.match += int(result.MatchedCount)
+		b.insert += int(result.InsertedCount)
+		b.upsert += int(result.UpsertedCount)
+		b.delete += int(result.DeletedCount)
+		tempHolder = nil
 	}
-	b.modify += int(result.ModifiedCount)
-	b.match += int(result.MatchedCount)
-	b.insert += int(result.InsertedCount)
-	b.upsert += int(result.UpsertedCount)
-	b.delete += int(result.DeletedCount)
-	tempHolder = nil
 }
 
 // NewBulk - prepare bulk operation

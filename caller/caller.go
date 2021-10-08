@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
 )
 
 func Caller() string {
@@ -19,6 +18,5 @@ func Caller() string {
 			break
 		}
 	}
-	pos := strings.LastIndex(stack, "<")
-	return stack[:pos] + "<<"
+	return stack
 }
