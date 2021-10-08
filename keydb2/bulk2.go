@@ -27,70 +27,80 @@ type BulkBlock struct {
 }
 
 // merger - 야러 고루틴에서 보내지는 요구를 모아서 DB에 적용한다.
-func (b *BulkBlock) goRoutineMerger() {
+func goRoutineMerger(b *BulkBlock) {
 	defer b.goRoutineRequestWG.Done()
 	var tempHolder []mongo.WriteModel
+	var tempCount int
 	var nonOrderedOpt = options.BulkWrite().SetOrdered(false)
 	var result *mongo.BulkWriteResult
 	for request := range b.goRoutineRequest {
+		tempHolder = append(tempHolder, request)
+		tempCount++
 		if len(tempHolder) >= b.limit {
+			log.Println(">>>>>>>>>>>>", b.collectionName, tempCount)
 			if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
 				log.Fatalln(caller.Caller(), b, b.err)
 			}
+			tempHolder = nil
 			b.modify += int(result.ModifiedCount)
 			b.match += int(result.MatchedCount)
 			b.insert += int(result.InsertedCount)
 			b.upsert += int(result.UpsertedCount)
 			b.delete += int(result.DeletedCount)
-			tempHolder = nil
 		}
-		tempHolder = append(tempHolder, request)
 	}
 	// sender close channel
 	if len(tempHolder) > 0 {
 		if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
 			log.Fatalln(caller.Caller(), b, b.err)
 		}
+		tempHolder = nil
 		b.modify += int(result.ModifiedCount)
 		b.match += int(result.MatchedCount)
 		b.insert += int(result.InsertedCount)
 		b.upsert += int(result.UpsertedCount)
 		b.delete += int(result.DeletedCount)
-		tempHolder = nil
 	}
 }
 
 // NewBulk - prepare bulk operation
 func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock {
-	var b BulkBlock
-	b.dbName = dbName
-	b.collectionName = collectionName
-	b.collection = x.Col(dbName, collectionName)
-	b.limit = interval
-	b.goRoutineRequest = make(chan mongo.WriteModel)
-	b.goRoutineRequestWG.Add(1)
-	go b.goRoutineMerger()
-	return &b
+	var pB *BulkBlock
+	var exist bool
+	dbCol := dbName + "::" + collectionName
+	if pB, exist = x.mapBulk[dbCol]; !exist {
+		var b BulkBlock
+		pB = &b
+		b.dbName = dbName
+		b.collectionName = collectionName
+		b.collection = x.Col(dbName, collectionName)
+		b.limit = interval
+		b.goRoutineRequest = make(chan mongo.WriteModel)
+		b.goRoutineRequestWG.Add(1)
+		x.mapBulk[dbCol] = &b
+		go goRoutineMerger(pB)
+	}
+	return pB
 }
 
 // InsertOne - append action InsertOne.
-func (b *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
-	b.goRoutineRequest <- model
+func (bb *BulkBlock) InsertOne(model *mongo.InsertOneModel) {
+	bb.goRoutineRequest <- model
 }
 
 // UpdateOne - append action UpdateOne.
-func (b *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
-	b.goRoutineRequest <- model
+func (bb *BulkBlock) UpdateOne(model *mongo.UpdateOneModel) {
+	bb.goRoutineRequest <- model
 }
 
 // Close - send remain accumulated request.
-func (b *BulkBlock) Close() {
-	close(b.goRoutineRequest)
-	b.goRoutineRequestWG.Wait()
+func (bb *BulkBlock) Close() {
+	close(bb.goRoutineRequest)
+	bb.goRoutineRequestWG.Wait()
 }
 
 // String - status message
-func (b *BulkBlock) String() string {
-	return fmt.Sprintf("/d:%s/c:%s/(ins:%d mat:%d mod:%d ups:%d del:%d)", b.dbName, b.collectionName,
-		b.insert, b.match, b.modify, b.upsert, b.delete)
+func (bb *BulkBlock) String() string {
+	return fmt.Sprintf("/d:%s/c:%s/(ins:%d mat:%d mod:%d ups:%d del:%d)", bb.dbName, bb.collectionName,
+		bb.insert, bb.match, bb.modify, bb.upsert, bb.delete)
 }

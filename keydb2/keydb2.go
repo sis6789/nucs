@@ -22,6 +22,7 @@ type KeyDB struct {
 	mongodbAccess string
 	mongoClient   *mongo.Client //= nil
 	mapCollection map[string]*mongo.Collection
+	mapBulk       map[string]*BulkBlock
 	colMapMutex   sync.Mutex
 }
 
@@ -44,6 +45,7 @@ func New(access string) *KeyDB {
 			log.Fatalln(caller.Caller(), newKeyDB.err)
 		}
 		newKeyDB.mapCollection = make(map[string]*mongo.Collection)
+		newKeyDB.mapBulk = make(map[string]*BulkBlock)
 		dbMap[access] = &newKeyDB
 		savedKeyDB = &newKeyDB
 	}
@@ -89,6 +91,7 @@ func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
 				log.Fatalln(caller.Caller(), x.err)
 			}
 			delete(x.mapCollection, dbCol)
+			delete(x.mapBulk, dbCol)
 		}
 	}
 	x.colMapMutex.Unlock()
@@ -104,6 +107,12 @@ func (x *KeyDB) DropDb(dbName string) {
 		dbCol := strings.Split(k, "::")
 		if dbCol[0] == dbName {
 			delete(x.mapCollection, k)
+		}
+	}
+	for k := range x.mapBulk {
+		dbCol := strings.Split(k, "::")
+		if dbCol[0] == dbName {
+			delete(x.mapBulk, k)
 		}
 	}
 	x.colMapMutex.Unlock()

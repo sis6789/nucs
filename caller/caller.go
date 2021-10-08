@@ -7,7 +7,7 @@ import (
 )
 
 func Caller() string {
-	ix := 2
+	ix := 0
 	stack := ""
 	for {
 		_, file, line, ok := runtime.Caller(ix)
