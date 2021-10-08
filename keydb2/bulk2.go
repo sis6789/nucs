@@ -3,10 +3,11 @@ package keydb2
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/sis6789/nucs/caller"
 )
@@ -16,51 +17,44 @@ type BulkBlock struct {
 	dbName             string
 	collectionName     string
 	collection         *mongo.Collection
-	modify             int
-	match              int
-	insert             int
-	upsert             int
-	delete             int
-	err                error
 	goRoutineRequest   chan mongo.WriteModel
 	goRoutineRequestWG sync.WaitGroup
+	tempCount          int
 }
 
 // merger - 야러 고루틴에서 보내지는 요구를 모아서 DB에 적용한다.
 func goRoutineMerger(b *BulkBlock) {
 	defer b.goRoutineRequestWG.Done()
 	var tempHolder []mongo.WriteModel
-	var tempCount int
 	var nonOrderedOpt = options.BulkWrite().SetOrdered(false)
-	var result *mongo.BulkWriteResult
+	var wgAsync sync.WaitGroup
 	for request := range b.goRoutineRequest {
 		tempHolder = append(tempHolder, request)
-		tempCount++
+		b.tempCount++
 		if len(tempHolder) >= b.limit {
-			log.Println(">>>>>>>>>>>>", b.collectionName, tempCount)
-			if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
-				log.Fatalln(caller.Caller(), b, b.err)
-			}
-			tempHolder = nil
-			b.modify += int(result.ModifiedCount)
-			b.match += int(result.MatchedCount)
-			b.insert += int(result.InsertedCount)
-			b.upsert += int(result.UpsertedCount)
-			b.delete += int(result.DeletedCount)
+			wgAsync.Add(1)
+			go func(models []mongo.WriteModel) {
+				defer wgAsync.Done()
+				if _, err := b.collection.BulkWrite(context.Background(), models, nonOrderedOpt); err != nil {
+					log.Fatalln(caller.Caller(), b, err)
+				}
+			}(tempHolder)
+			tempHolder = []mongo.WriteModel{}
 		}
 	}
 	// sender close channel
 	if len(tempHolder) > 0 {
-		if result, b.err = b.collection.BulkWrite(context.Background(), tempHolder, nonOrderedOpt); b.err != nil {
-			log.Fatalln(caller.Caller(), b, b.err)
-		}
-		tempHolder = nil
-		b.modify += int(result.ModifiedCount)
-		b.match += int(result.MatchedCount)
-		b.insert += int(result.InsertedCount)
-		b.upsert += int(result.UpsertedCount)
-		b.delete += int(result.DeletedCount)
+		wgAsync.Add(1)
+		go func(models []mongo.WriteModel) {
+			defer wgAsync.Done()
+			if _, err := b.collection.BulkWrite(context.Background(), models, nonOrderedOpt); err != nil {
+				log.Fatalln(caller.Caller(), b, err)
+			}
+		}(tempHolder)
+		tempHolder = []mongo.WriteModel{}
 	}
+	wgAsync.Wait()
+	log.Printf("close bulk %v", b)
 }
 
 // NewBulk - prepare bulk operation
@@ -101,6 +95,5 @@ func (bb *BulkBlock) Close() {
 
 // String - status message
 func (bb *BulkBlock) String() string {
-	return fmt.Sprintf("/d:%s/c:%s/(ins:%d mat:%d mod:%d ups:%d del:%d)", bb.dbName, bb.collectionName,
-		bb.insert, bb.match, bb.modify, bb.upsert, bb.delete)
+	return fmt.Sprintf("%s.%s(%d)", bb.dbName, bb.collectionName, bb.tempCount)
 }

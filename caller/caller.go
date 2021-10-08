@@ -4,10 +4,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 )
 
 func Caller() string {
-	ix := 0
+	ix := 2
 	stack := ""
 	for {
 		_, file, line, ok := runtime.Caller(ix)
@@ -18,5 +19,6 @@ func Caller() string {
 			break
 		}
 	}
-	return stack
+	pos := strings.LastIndex(stack, "<")
+	return stack[:pos] + "$"
 }
