@@ -95,5 +95,5 @@ func (bb *BulkBlock) Close() {
 
 // String - status message
 func (bb *BulkBlock) String() string {
-	return fmt.Sprintf("%s.%s(%d)", bb.dbName, bb.collectionName, bb.tempCount)
+	return fmt.Sprintf("%s.%s", bb.dbName, bb.collectionName)
 }
