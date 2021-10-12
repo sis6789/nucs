@@ -13,24 +13,25 @@ import (
 	"github.com/sis6789/nucs/caller"
 )
 
-var dbMap = make(map[string]*KeyDB)
-var dbMapMutex sync.Mutex
+var clientMap = make(map[string]*KeyDB)
+var clientMapMutex sync.Mutex
 
 type KeyDB struct {
-	myContext     context.Context //= context.Background()
-	err           error
-	mongodbAccess string
-	mongoClient   *mongo.Client //= nil
-	mapCollection map[string]*mongo.Collection
-	mapBulk       map[string]*BulkBlock
-	colMapMutex   sync.Mutex
+	myContext          context.Context //= context.Background()
+	err                error
+	mongodbAccess      string
+	mongoClient        *mongo.Client //= nil
+	mapCollection      map[string]*mongo.Collection
+	mapCollectionMutex sync.Mutex
+	mapBulk            map[string]*BulkBlock
+	mapBulkMutex       sync.Mutex
 }
 
 // New - prepare mongodb access
 func New(access string) *KeyDB {
 	var err error
-	dbMapMutex.Lock()
-	savedKeyDB, exist := dbMap[access]
+	clientMapMutex.Lock()
+	savedKeyDB, exist := clientMap[access]
 	if !exist {
 		var newKeyDB KeyDB
 		newKeyDB.myContext = context.Background()
@@ -46,44 +47,46 @@ func New(access string) *KeyDB {
 		}
 		newKeyDB.mapCollection = make(map[string]*mongo.Collection)
 		newKeyDB.mapBulk = make(map[string]*BulkBlock)
-		dbMap[access] = &newKeyDB
+		clientMap[access] = &newKeyDB
 		savedKeyDB = &newKeyDB
 	}
-	dbMapMutex.Unlock()
+	clientMapMutex.Unlock()
 	return savedKeyDB
 }
 
 // GoodBye - disconnect all connection
 func GoodBye() {
-	dbMapMutex.Lock()
-	for k, kdb := range dbMap {
+	clientMapMutex.Lock()
+	for k, kdb := range clientMap {
 		if kdb.err = kdb.mongoClient.Disconnect(kdb.myContext); kdb.err != nil {
-			log.Print(kdb.mongodbAccess, kdb.err)
+			log.Printf("%v %v", kdb.mongodbAccess, kdb.err)
 		} else {
-			log.Print("disconnect", kdb.mongodbAccess, kdb.err)
+			log.Printf("disconnect %v %v", kdb.mongodbAccess, kdb.err)
 		}
-		delete(dbMap, k)
+		delete(clientMap, k)
 	}
-	dbMapMutex.Unlock()
+	clientMapMutex.Unlock()
 }
 
 // Col - return collection, if not exist make collection and return it.
 func (x *KeyDB) Col(dbName, collectionName string) *mongo.Collection {
 	dbCol := dbName + "::" + collectionName
-	x.colMapMutex.Lock()
 	var collection *mongo.Collection
-	var exist bool
-	if collection, exist = x.mapCollection[dbCol]; !exist {
-		collection = x.mongoClient.Database(dbName).Collection(collectionName)
-		x.mapCollection[dbCol] = collection
+	{
+		x.mapCollectionMutex.Lock()
+		var exist bool
+		if collection, exist = x.mapCollection[dbCol]; !exist {
+			collection = x.mongoClient.Database(dbName).Collection(collectionName)
+			x.mapCollection[dbCol] = collection
+		}
+		x.mapCollectionMutex.Unlock()
 	}
-	x.colMapMutex.Unlock()
 	return collection
 }
 
 // Drop - delete collection
 func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
-	x.colMapMutex.Lock()
+	x.mapCollectionMutex.Lock()
 	for _, colName := range collectionNames {
 		dbCol := dbName + "::" + colName
 		if col, exist := x.mapCollection[dbCol]; exist {
@@ -94,12 +97,12 @@ func (x *KeyDB) Drop(dbName string, collectionNames ...string) {
 			delete(x.mapBulk, dbCol)
 		}
 	}
-	x.colMapMutex.Unlock()
+	x.mapCollectionMutex.Unlock()
 }
 
 // DropDb - Delete DB and associated collection.
 func (x *KeyDB) DropDb(dbName string) {
-	x.colMapMutex.Lock()
+	x.mapCollectionMutex.Lock()
 	if x.err = x.mongoClient.Database(dbName).Drop(x.myContext); x.err != nil {
 		log.Fatalln(caller.Caller(), x.err)
 	}
@@ -115,7 +118,7 @@ func (x *KeyDB) DropDb(dbName string) {
 			delete(x.mapBulk, k)
 		}
 	}
-	x.colMapMutex.Unlock()
+	x.mapCollectionMutex.Unlock()
 }
 
 // Index - add index definition. Specify key elements as repeated string.

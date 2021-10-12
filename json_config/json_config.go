@@ -3,13 +3,14 @@ package json_config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sis6789/nucs/caller"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
+
+	"github.com/sis6789/nucs/caller"
 )
 
 var jsonConfig = make(map[string]interface{})
@@ -23,7 +24,7 @@ func Map() *map[string]interface{} {
 func Decode(s []byte) {
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(s, &tM); err != nil {
-		log.Print(caller.Caller(), err)
+		log.Printf("%v %v", caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -48,7 +49,7 @@ func Read(fileName string) {
 	}
 	tM := make(map[string]interface{})
 	if err := json.Unmarshal(fBytes, &tM); err != nil {
-		log.Print(caller.Caller(), err)
+		log.Printf("%v %v", caller.Caller(), err)
 		return
 	}
 	Set(tM)
@@ -60,11 +61,11 @@ func Write(fileName string) {
 	var fBytes []byte
 	fBytes, err = json.Marshal(jsonConfig)
 	if err != nil {
-		log.Print(caller.Caller(), err)
+		log.Printf("%v %v", caller.Caller(), err)
 	}
 	err = ioutil.WriteFile(fileName, fBytes, 0777)
 	if err != nil {
-		log.Print(caller.Caller(), err)
+		log.Printf("%v %v", caller.Caller(), err)
 	}
 }
 

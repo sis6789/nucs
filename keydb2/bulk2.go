@@ -62,6 +62,8 @@ func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock 
 	var pB *BulkBlock
 	var exist bool
 	dbCol := dbName + "::" + collectionName
+
+	x.mapBulkMutex.Lock()
 	if pB, exist = x.mapBulk[dbCol]; !exist {
 		var b BulkBlock
 		pB = &b
@@ -74,6 +76,8 @@ func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock 
 		x.mapBulk[dbCol] = &b
 		go goRoutineMerger(pB)
 	}
+	x.mapBulkMutex.Unlock()
+
 	return pB
 }
 
