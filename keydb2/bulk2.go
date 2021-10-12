@@ -3,11 +3,10 @@ package keydb2
 import (
 	"context"
 	"fmt"
-	"log"
-	"sync"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"sync"
 
 	"github.com/sis6789/nucs/caller"
 )
@@ -19,8 +18,7 @@ type BulkBlock struct {
 	collection         *mongo.Collection
 	goRoutineRequest   chan mongo.WriteModel
 	goRoutineRequestWG sync.WaitGroup
-	tempCount          int
-	isClosed bool
+	isClosed           bool
 }
 
 // merger - 야러 고루틴에서 보내지는 요구를 모아서 DB에 적용한다.
@@ -31,7 +29,6 @@ func goRoutineMerger(b *BulkBlock) {
 	var wgAsync sync.WaitGroup
 	for request := range b.goRoutineRequest {
 		tempHolder = append(tempHolder, request)
-		b.tempCount++
 		if len(tempHolder) >= b.limit {
 			wgAsync.Add(1)
 			go func(models []mongo.WriteModel) {
@@ -110,6 +107,8 @@ func (bb *BulkBlock) Close() {
 	bb.isClosed = true
 	close(bb.goRoutineRequest)
 	bb.goRoutineRequestWG.Wait()
+	bb.isClosed = true
+	bb.goRoutineRequest = nil
 }
 
 // String - status message
