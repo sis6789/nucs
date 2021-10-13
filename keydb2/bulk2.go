@@ -53,7 +53,7 @@ func goRoutineMerger(b *BulkBlock) {
 		tempHolder = []mongo.WriteModel{}
 	}
 	wgAsync.Wait()
-	log.Printf("close bulk %v", b)
+	log.Printf("close bulk: %v mongo:%v db:%v col:%v", caller.Caller(), b.client.mongodbAccess, b.dbName, b.collectionName)
 }
 
 // NewBulk - prepare bulk operation
