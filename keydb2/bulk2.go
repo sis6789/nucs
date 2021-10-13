@@ -76,8 +76,8 @@ func (x *KeyDB) NewBulk(dbName, collectionName string, interval int) *BulkBlock 
 		b.goRoutineRequestWG.Add(1)
 		x.mapBulk[dbCol] = &b
 		go goRoutineMerger(pB)
+		log.Printf("newBulk start: %v mongo:%v db:%v col:%v", caller.Caller(), x.mongodbAccess, dbName, collectionName)
 	} else if pB.isClosed {
-		log.Printf("newBulk after close: %v mongo:%v db:%v col:%v", caller.Caller(), x.mongodbAccess, dbName, collectionName)
 		pB.isClosed = false
 		pB.dbName = dbName
 		pB.collectionName = collectionName
