@@ -2,7 +2,8 @@ package oldBlast
 
 import (
 	"context"
-	"github.com/sis6789/nucs/keydb2"
+
+	"github.com/sis6789/simple_mongo/keydb2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

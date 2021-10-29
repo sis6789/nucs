@@ -3,7 +3,7 @@ package keydb
 import (
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/sis6789/nucs/keydb2"
+	"github.com/sis6789/simple_mongo/keydb2"
 )
 
 var dbName string

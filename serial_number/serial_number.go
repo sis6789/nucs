@@ -22,7 +22,7 @@ func (x *SerialNumber) generator() {
 		recover()        // disable chan panic
 		x.active = false // set NA
 	}()
-	var num = int(0)
+	var num = 0
 	for {
 		num++
 		x.intChannel <- num
