@@ -6,13 +6,14 @@ require (
 	github.com/biogo/biogo v1.0.3
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	go.mongodb.org/mongo-driver v1.7.2
+	github.com/sis6789/simple_mongo v0.0.0-20211103000632-3aa5ff321a5f
+	go.mongodb.org/mongo-driver v1.7.3
 )
 
 require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/klauspost/compress v1.9.5 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
