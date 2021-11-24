@@ -1,14 +1,15 @@
 package read_fastq_both
 
 import (
-	"github.com/sis6789/nucs/caller"
 	"io/ioutil"
 	"log"
 	"reflect"
 	"regexp"
+	"strconv"
+
+	"github.com/sis6789/nucs/caller"
 )
 
-var regSplit = regexp.MustCompile(`^(\w+)-(\d+)([_.][rR]?([12]))?.+$`)
 var complementTable [128]byte
 
 func init() {
@@ -20,6 +21,45 @@ func init() {
 	complementTable['t'] = 'a'
 	complementTable['c'] = 'g'
 	complementTable['g'] = 'c'
+}
+
+func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
+	GName string
+	GNum  int
+	FNum  int
+	RNum  int
+	Ext   string
+}) {
+	nullZero := func(w string) int {
+		if w == "" {
+			return 0
+		}
+		if v, err := strconv.Atoi(w); err == nil {
+			return v
+		} else {
+			return 0
+		}
+	}
+	match := namedPattern.FindStringSubmatch(source)
+	if match == nil {
+		rVal.Ext = "ERROR!"
+		return rVal
+	}
+	for i, name := range namedPattern.SubexpNames() {
+		switch name {
+		case "gname":
+			rVal.GName = match[i]
+		case "gnum":
+			rVal.GNum = nullZero(match[i])
+		case "fnum":
+			rVal.FNum = nullZero(match[i])
+		case "rnum":
+			rVal.RNum = nullZero(match[i])
+		case "ext":
+			rVal.Ext = match[i]
+		}
+	}
+	return rVal
 }
 
 // PairList : fastq 파일에 대한 키오믹스 명영규칙에 따라 존재하는 파일의 R1, R2 쌍이 값을 결정하여 그 목록을 반환한다.
@@ -42,15 +82,15 @@ func PairList(path string, fileNamePattern string) []string {
 		if !regTarget.MatchString(fi.Name()) {
 			continue
 		}
-		token := regSplit.FindStringSubmatch(fi.Name())
-		switch token[4] {
-		case "1":
+		fields := MatchNamedField(regTarget, fi.Name())
+		switch fields.RNum {
+		case 1:
 			if fnOne {
 				fnList = append(fnList, fnPair)
 			}
 			fnPair = fi.Name()
 			fnOne = true
-		case "2":
+		case 2:
 			if fnOne {
 				fnPair += ";" + fi.Name()
 				fnList = append(fnList, fnPair)
