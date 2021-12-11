@@ -103,8 +103,8 @@ func PairList(path string, fileNamePattern string) []string {
 	return fnList
 }
 
-// string을 역순으로 배열한다. 입력을 직접 변경한다.
-func reverseComplementString(s *string) {
+// ReverseComplementString string을 역순으로 배열한다. 입력을 직접 변경한다.
+func ReverseComplementString(s *string) {
 	sb := []byte(*s)
 	n := len(sb)
 	swap := reflect.Swapper(sb)

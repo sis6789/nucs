@@ -149,7 +149,7 @@ func (x *ReadPair) Next() bool {
 		x.lineNumber[1]++
 		if x.lineNumber[1]%4 == 2 {
 			x.Text[1] = x.scan[1].Text()
-			reverseComplementString(&x.Text[1])
+			ReverseComplementString(&x.Text[1])
 			x.recCount[1]++
 			break
 		}
@@ -210,7 +210,7 @@ func (x *ReadPair) AtRec(recOrdinal int) bool {
 			x.lineNumber[1]++
 			if x.lineNumber[1]%4 == 2 {
 				x.Text[1] = x.scan[1].Text()
-				reverseComplementString(&x.Text[1])
+				ReverseComplementString(&x.Text[1])
 				x.recCount[1]++
 				break
 			}
@@ -248,7 +248,7 @@ func (x *ReadPair) At2Rec(recOrdinal int) bool {
 			x.lineNumber[1]++
 			if x.lineNumber[1]%4 == 2 {
 				x.Text[1] = x.scan[1].Text()
-				reverseComplementString(&x.Text[1])
+				ReverseComplementString(&x.Text[1])
 				x.recCount[1]++
 				break
 			}
