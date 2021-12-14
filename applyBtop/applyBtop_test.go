@@ -12,7 +12,7 @@ func TestApplyBtop(t *testing.T) {
 	fmt.Println(a1)
 
 	bp := "ACCGACGCTCTTCCGATCTTACCTGTAGTCAGCGGCCGTCAGTCTTGGATCCGGAGGGGAGGAGCCAAGATGGCCA"
-	bt := "30"
+	bt := "20AGG--A7"
 	req := BtopApplyRequest{bp, 46, 100527219, 30, bt}
 
 	resp := ApplyBtop(req)
