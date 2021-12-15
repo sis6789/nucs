@@ -1,8 +1,6 @@
 package sort_multi_files
 
 import (
-	"github.com/google/uuid"
-	"github.com/sis6789/nucs/caller"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +9,10 @@ import (
 	"regexp"
 	"runtime"
 	"sync"
+
+	"github.com/google/uuid"
+
+	"github.com/sis6789/nucs/caller"
 )
 
 func SortFiles(folder string, pattern string, keyList ...string) {
@@ -115,14 +117,10 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 	if err = sortInFile.Close(); err != nil {
 		log.Fatalln(caller.Caller(), err)
 	}
-	if err = sortOutFile.Sync(); err != nil {
-		log.Fatalln(caller.Caller(), err)
-	} else if err = sortOutFile.Close(); err != nil {
+	if err = sortOutFile.Close(); err != nil {
 		log.Fatalln(caller.Caller(), err)
 	}
-	if err = sortErrFile.Sync(); err != nil {
-		log.Fatalln(caller.Caller(), err)
-	} else if err = sortErrFile.Close(); err != nil {
+	if err = sortErrFile.Close(); err != nil {
 		log.Fatalln(caller.Caller(), err)
 	}
 	// remove error file
