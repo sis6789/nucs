@@ -11,8 +11,6 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-
-	"github.com/sis6789/nucs/caller"
 )
 
 func SortFiles(folder string, pattern string, keyList ...string) {
@@ -34,7 +32,7 @@ func targetList(folder string, pattern string) []string {
 	regPattern := regexp.MustCompile(pattern)
 	files, err := ioutil.ReadDir(folder)
 	if err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 	var fnList []string
 	for _, fi := range files {
@@ -60,15 +58,15 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 
 	sortInFile, err := os.Open(sortInFn)
 	if err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 	sortOutFile, err := os.Create(sortOutFn)
 	if err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 	sortErrFile, err := os.Create(sortErrFn)
 	if err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 
 	var cmdPath string
@@ -76,14 +74,14 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 	if runtime.GOOS == "windows" {
 		cmdPath, err = exec.LookPath("wsl")
 		if err != nil {
-			log.Fatalln(caller.Caller(), err)
+			log.Fatalln(err)
 			return
 		}
 		sortOrder = []string{cmdPath, "sort"}
 	} else {
 		cmdPath, err = exec.LookPath("sort")
 		if err != nil {
-			log.Fatalln(caller.Caller(), err)
+			log.Fatalln(err)
 			return
 		}
 		sortOrder = []string{cmdPath}
@@ -103,7 +101,7 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()
-		log.Fatalln(caller.Caller(), fileName)
+		log.Fatalln(fileName)
 	}
 	// wait end of sort
 	if endErr := cmd.Wait(); endErr != nil {
@@ -111,26 +109,30 @@ func doSort(wg *sync.WaitGroup, guard *chan struct{}, folder, fileName string, k
 		_ = sortInFile.Close()
 		_ = sortOutFile.Close()
 		_ = sortErrFile.Close()
-		log.Fatalln(caller.Caller(), fileName)
+		log.Fatalln(fileName)
 	}
 	// close
 	if err = sortInFile.Close(); err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
-	if err = sortOutFile.Close(); err != nil {
-		log.Fatalln(caller.Caller(), err)
+	if err = sortOutFile.Sync(); err != nil {
+		log.Fatalln(err)
+	} else if err = sortOutFile.Close(); err != nil {
+		log.Fatalln(err)
 	}
-	if err = sortErrFile.Close(); err != nil {
-		log.Fatalln(caller.Caller(), err)
+	if err = sortErrFile.Sync(); err != nil {
+		log.Fatalln(err)
+	} else if err = sortErrFile.Close(); err != nil {
+		log.Fatalln(err)
 	}
 	// remove error file
 	if err = os.Remove(sortErrFn); err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 	if err = os.Remove(sortInFn); err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 	if err = os.Rename(sortOutFn, sortInFn); err != nil {
-		log.Fatalln(caller.Caller(), err)
+		log.Fatalln(err)
 	}
 }
