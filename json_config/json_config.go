@@ -9,11 +9,27 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/sis6789/nucs/caller"
 )
 
 var jsonConfig = make(map[string]interface{})
+
+func normalize() {
+	for k, v := range jsonConfig {
+		k1 := strings.ToLower(k)
+		k1 = strings.ReplaceAll(k1, "-", "")
+		k1 = strings.ReplaceAll(k1, "_", "")
+		jsonConfig[k1] = v
+	}
+}
+func nStr(w string) string {
+	k1 := strings.ToLower(w)
+	k1 = strings.ReplaceAll(k1, "-", "")
+	k1 = strings.ReplaceAll(k1, "_", "")
+	return k1
+}
 
 // Map - return address of map structure "map[string]interface{}"
 func Map() *map[string]interface{} {
@@ -71,13 +87,13 @@ func Write(fileName string) {
 
 // Exist - 필드 존재 확인
 func Exist(field string) bool {
-	_, exist := jsonConfig[field]
+	_, exist := jsonConfig[nStr(field)]
 	return exist
 }
 
 // Get : 필드 값을 반환한다. 반환 값은 empty interface로 적절한 type inference를 해야 한다.
 func Get(field string) interface{} {
-	v, exist := jsonConfig[field]
+	v, exist := jsonConfig[nStr(field)]
 	if exist {
 		return v
 	} else {
@@ -87,7 +103,8 @@ func Get(field string) interface{} {
 
 // Put : 환경 값을 저장한다. 동일한 필드가 존재하면 값을 대체한다. 없으면 신설한다.
 func Put(field string, v interface{}) {
-	jsonConfig[field] = v
+	jsonConfig[nStr(field)] = v
+	normalize()
 }
 
 // Set : 환경 값을 입력 값으로 치환한다.
@@ -95,11 +112,12 @@ func Set(setValue map[string]interface{}) {
 	for k, v := range setValue {
 		jsonConfig[k] = v
 	}
+	normalize()
 }
 
 // Int : 숫자 필드로서 Int64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Int(field string) int {
-	v, exist := jsonConfig[field]
+	v, exist := jsonConfig[nStr(field)]
 	if !exist {
 		return 0
 	}
@@ -121,7 +139,7 @@ func Int(field string) int {
 
 // Float64 : 숫자 필드로서 Float64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Float64(field string) float64 {
-	v, exist := jsonConfig[field]
+	v, exist := jsonConfig[nStr(field)]
 	if !exist {
 		return 0.0
 	}
@@ -143,7 +161,7 @@ func Float64(field string) float64 {
 
 // String : 필드값을 문자열로 반환한다.
 func String(field string) string {
-	v := jsonConfig[field]
+	v := jsonConfig[nStr(field)]
 	return fmt.Sprint(v)
 }
 

@@ -2,10 +2,11 @@ package json_config
 
 import (
 	_ "embed"
-	"github.com/mitchellh/go-homedir"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 //go:embed linux.json
@@ -41,4 +42,6 @@ func KeyomicsBasic() {
 	jsonConfig["logDir"] = filepath.Join(jsonConfig["workDir"].(string), "log")
 	jsonConfig["saveDir"] = filepath.Join(jsonConfig["workDir"].(string), "save")
 	jsonConfig["tempDir"] = filepath.Join(jsonConfig["workDir"].(string), "temp")
+
+	normalize()
 }
