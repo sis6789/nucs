@@ -25,7 +25,12 @@ func normalize() {
 		k1 = strings.ReplaceAll(k1, "_", "")
 		w[k1] = v
 	}
-	jsonConfig = w
+	for k := range jsonConfig {
+		delete(jsonConfig, k)
+	}
+	for k, v := range w {
+		jsonConfig[k] = v
+	}
 }
 
 func nStr(w string) string {
@@ -180,7 +185,7 @@ func Report() string {
 	sort.Strings(kl)
 	s := ""
 	for _, k := range kl {
-		s += fmt.Sprintf("%v\t%v\n", k, jsonConfig[k])
+		s += fmt.Sprintf("%#v %#v\n", k, jsonConfig[k])
 	}
 	return s[0 : len(s)-1]
 }
@@ -194,7 +199,7 @@ func ReportSlice() []string {
 	sort.Strings(kl)
 	var s []string
 	for _, k := range kl {
-		s = append(s, fmt.Sprintf("%v\t%v", k, jsonConfig[k]))
+		s = append(s, fmt.Sprintf("%#v %#v", k, jsonConfig[k]))
 	}
 	return s
 }
