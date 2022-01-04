@@ -23,8 +23,8 @@ func KeyomicsBasic() {
 		Decode(linuxJson)
 	}
 
-	if _, exist := jsonConfig["rootDir"]; !exist {
-		jsonConfig["rootDir"], _ = homedir.Dir()
+	if _, exist := jsonConfig["folderBase"]; !exist {
+		jsonConfig["folderBase"], _ = homedir.Dir()
 	}
 	if _, exist := jsonConfig["jobTitle"]; !exist {
 		jsonConfig["jobTitle"] = time.Now().Format("20060102")
@@ -37,7 +37,7 @@ func KeyomicsBasic() {
 	} else {
 		jsonConfig["fastqQueryTerminatorLength"] = 0
 	}
-	jsonConfig["workDir"] = filepath.Join(jsonConfig["rootDir"].(string),
+	jsonConfig["workDir"] = filepath.Join(jsonConfig["folderBase"].(string),
 		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string))
 	jsonConfig["logDir"] = filepath.Join(jsonConfig["workDir"].(string), "log")
 	jsonConfig["saveDir"] = filepath.Join(jsonConfig["workDir"].(string), "save")

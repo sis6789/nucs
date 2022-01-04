@@ -14,7 +14,7 @@
   "oldBlastCollection": "bpMaster",
   "oldBlastDB": "kmMaster",
   "oldBlastServer": "mongodb://192.168.0.6:27017",
-  "rootDir": "D:/keyomics_test",
+  "folderBase": "D:/keyomics_test",
   "runName": "run01",
   "testLimit": 100000,
   "topBottomMinimumCount": 2,
