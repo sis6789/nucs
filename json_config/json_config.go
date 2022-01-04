@@ -17,13 +17,17 @@ import (
 var jsonConfig = make(map[string]interface{})
 
 func normalize() {
+	// keep only lower case
+	w := make(map[string]interface{})
 	for k, v := range jsonConfig {
 		k1 := strings.ToLower(k)
 		k1 = strings.ReplaceAll(k1, "-", "")
 		k1 = strings.ReplaceAll(k1, "_", "")
-		jsonConfig[k1] = v
+		w[k1] = v
 	}
+	jsonConfig = w
 }
+
 func nStr(w string) string {
 	k1 := strings.ToLower(w)
 	k1 = strings.ReplaceAll(k1, "-", "")
@@ -71,15 +75,6 @@ func Read(fileName string) {
 	}
 	Set(tM)
 	normalize()
-
-	jsonConfig["workDir"] = filepath.Join(jsonConfig["folderBase"].(string),
-		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string))
-	jsonConfig["logDir"] = filepath.Join(jsonConfig["workDir"].(string), "log")
-	jsonConfig["saveDir"] = filepath.Join(jsonConfig["workDir"].(string), "save")
-	jsonConfig["tempDir"] = filepath.Join(jsonConfig["workDir"].(string), "temp")
-
-	normalize()
-
 }
 
 // Write : 현재의 설정 상태를 파일에 저장한다.
