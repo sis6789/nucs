@@ -44,6 +44,7 @@ func Decode(s []byte) {
 		return
 	}
 	Set(tM)
+	normalize()
 }
 
 // Encode : 저장 자료 전체를 JSON string으로 반환한다.
@@ -69,6 +70,16 @@ func Read(fileName string) {
 		return
 	}
 	Set(tM)
+	normalize()
+
+	jsonConfig["workDir"] = filepath.Join(jsonConfig["folderBase"].(string),
+		jsonConfig["jobTitle"].(string), jsonConfig["runName"].(string))
+	jsonConfig["logDir"] = filepath.Join(jsonConfig["workDir"].(string), "log")
+	jsonConfig["saveDir"] = filepath.Join(jsonConfig["workDir"].(string), "save")
+	jsonConfig["tempDir"] = filepath.Join(jsonConfig["workDir"].(string), "temp")
+
+	normalize()
+
 }
 
 // Write : 현재의 설정 상태를 파일에 저장한다.
