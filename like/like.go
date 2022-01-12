@@ -95,3 +95,37 @@ func Like(s1, s2 string) (
 	qMatch = fmt.Sprint(fa[1])
 	return sStart, ratio, qStart, checkLen, countMatch, countFault, sMatch, qMatch
 }
+
+func LikeSW(s1, s2 []byte) (score, start1, end1, start2, end2 int) {
+
+	type matched struct {
+		s1    int
+		e1    int
+		s2    int
+		e2    int
+		score int
+	}
+	type scorer interface{ Score() int }
+
+	sws1 := &linear.Seq{Seq: alphabet.BytesToLetters(s1)}
+	sws1.Alpha = alphabet.DNAgapped
+	sws2 := &linear.Seq{Seq: alphabet.BytesToLetters(s2)}
+	sws2.Alpha = alphabet.DNAgapped
+
+	alignResult, _ := smith.Align(sws1, sws2)
+	highestMatch := matched{score: -1000}
+	for _, v := range alignResult {
+		m1 := matched{
+			s1:    v.Features()[0].Start(),
+			e1:    v.Features()[0].End(),
+			s2:    v.Features()[1].Start(),
+			e2:    v.Features()[1].End(),
+			score: v.(scorer).Score(),
+		}
+		if m1.score > highestMatch.score {
+			highestMatch = m1
+		}
+	}
+
+	return highestMatch.score, highestMatch.s1, highestMatch.e1, highestMatch.s2, highestMatch.e2
+}
