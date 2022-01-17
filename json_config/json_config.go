@@ -15,6 +15,7 @@ import (
 )
 
 var jsonConfig = make(map[string]interface{})
+var jsonUsed = make(map[string]struct{})
 
 func normalize() {
 	// keep only lower case
@@ -104,8 +105,10 @@ func Exist(field string) bool {
 
 // Get : 필드 값을 반환한다. 반환 값은 empty interface로 적절한 type inference를 해야 한다.
 func Get(field string) interface{} {
-	v, exist := jsonConfig[nStr(field)]
+	qry := nStr(field)
+	v, exist := jsonConfig[qry]
 	if exist {
+		jsonUsed[qry] = struct{}{}
 		return v
 	} else {
 		return nil
@@ -128,10 +131,12 @@ func Set(setValue map[string]interface{}) {
 
 // Int : 숫자 필드로서 Int64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Int(field string) int {
-	v, exist := jsonConfig[nStr(field)]
+	qry := nStr(field)
+	v, exist := jsonConfig[qry]
 	if !exist {
 		return 0
 	}
+	jsonUsed[qry] = struct{}{}
 	switch v.(type) {
 	case int:
 		return v.(int)
@@ -150,10 +155,12 @@ func Int(field string) int {
 
 // Float64 : 숫자 필드로서 Float64 값을 반환한다. 숫자 값이 아니면 panic한다.
 func Float64(field string) float64 {
-	v, exist := jsonConfig[nStr(field)]
+	qry := nStr(field)
+	v, exist := jsonConfig[qry]
 	if !exist {
 		return 0.0
 	}
+	jsonUsed[qry] = struct{}{}
 	switch v.(type) {
 	case float64:
 		return v.(float64)
@@ -172,7 +179,9 @@ func Float64(field string) float64 {
 
 // String : 필드값을 문자열로 반환한다.
 func String(field string) string {
-	v := jsonConfig[nStr(field)]
+	qry := nStr(field)
+	v := jsonConfig[qry]
+	jsonUsed[qry] = struct{}{}
 	return fmt.Sprint(v)
 }
 
@@ -190,10 +199,38 @@ func Report() string {
 	return s[0 : len(s)-1]
 }
 
+// ReportUsed : 사용된 환경 변수별 값을 개별 라인으로 반환한다.
+func ReportUsed() string {
+	var kl []string
+	for k := range jsonUsed {
+		kl = append(kl, k)
+	}
+	sort.Strings(kl)
+	s := ""
+	for _, k := range kl {
+		s += fmt.Sprintf("%#v %#v\n", k, jsonConfig[k])
+	}
+	return s[0 : len(s)-1]
+}
+
 // ReportSlice : 환경 변수별 값을 string slice로 반환한다.
 func ReportSlice() []string {
 	var kl []string
 	for k := range jsonConfig {
+		kl = append(kl, k)
+	}
+	sort.Strings(kl)
+	var s []string
+	for _, k := range kl {
+		s = append(s, fmt.Sprintf("%#v %#v", k, jsonConfig[k]))
+	}
+	return s
+}
+
+// ReportSliceUsed : 환경 변수별 값을 string slice로 반환한다.
+func ReportSliceUsed() []string {
+	var kl []string
+	for k := range jsonUsed {
 		kl = append(kl, k)
 	}
 	sort.Strings(kl)
