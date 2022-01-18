@@ -10,12 +10,20 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/sis6789/nucs/caller"
 )
 
 var jsonConfig = make(map[string]interface{})
 var jsonUsed = make(map[string]struct{})
+var usedMutex sync.Mutex
+
+func setUsed(field string) {
+	usedMutex.Lock()
+	jsonUsed[field] = struct{}{}
+	usedMutex.Unlock()
+}
 
 func normalize() {
 	// keep only lower case
@@ -108,7 +116,7 @@ func Get(field string) interface{} {
 	qry := nStr(field)
 	v, exist := jsonConfig[qry]
 	if exist {
-		jsonUsed[qry] = struct{}{}
+		setUsed(qry)
 		return v
 	} else {
 		return nil
@@ -136,7 +144,7 @@ func Int(field string) int {
 	if !exist {
 		return 0
 	}
-	jsonUsed[qry] = struct{}{}
+	setUsed(qry)
 	switch v.(type) {
 	case int:
 		return v.(int)
@@ -160,7 +168,7 @@ func Float64(field string) float64 {
 	if !exist {
 		return 0.0
 	}
-	jsonUsed[qry] = struct{}{}
+	setUsed(qry)
 	switch v.(type) {
 	case float64:
 		return v.(float64)
@@ -181,7 +189,7 @@ func Float64(field string) float64 {
 func String(field string) string {
 	qry := nStr(field)
 	v := jsonConfig[qry]
-	jsonUsed[qry] = struct{}{}
+	setUsed(qry)
 	return fmt.Sprint(v)
 }
 

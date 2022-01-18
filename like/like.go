@@ -15,8 +15,8 @@ var alphaWithBlank = alphabet.MustComplement(alphabet.NewComplementor(
 	false,
 ))
 
-var smith = align.SW{ // special for blank handling
-	{0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+var smithSW = align.SW{ // special for blank handling
+	{2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{-1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{-1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{-1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -34,49 +34,93 @@ var smith = align.SW{ // special for blank handling
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1},
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1},
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1},
-	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2},
+	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+}
+
+var smithSWAFFINE = align.SWAffine{ // special for blank handling
+	GapOpen: 0,
+	Matrix: align.Linear{
+		{2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1},
+		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+	},
 }
 
 //var splitExpStr = `\[(\d+),(\d+)\)/\[(\d+),(\d+)\)=(-?\d+)|\[(\d+),(\d+)\)/(-)=(-?\d+)|(-)/\[(\d+),(\d+)\)=(-?\d+)`
 //var splitExp = regexp.MustCompile(splitExpStr)
 
-type scorer interface{ Score() int }
-type Match struct {
-	S1    int
-	E1    int
-	S2    int
-	E2    int
-	Score int
+type scorer interface {
+	Score() int
 }
 
-func Like(s1, s2 []byte) (Match, error) {
-	// use smith waterman
-	fsa := &linear.Seq{Seq: alphabet.BytesToLetters(s1)}
+type Match struct {
+	BeginPos      int
+	EndPos        int
+	MatchCount    int
+	MisMatchCount int
+	ChangeCount   int
+	InsertCount   int
+	DeleteCount   int
+}
 
+func Like(subject, query []byte) (match Match, err error) {
+	queryLength := len(query)
+
+	// use smith waterman
+	fsa := &linear.Seq{Seq: alphabet.BytesToLetters(subject)}
 	fsa.Alpha = alphaWithBlank
-	fsb := &linear.Seq{Seq: alphabet.BytesToLetters(s2)}
+	fsb := &linear.Seq{Seq: alphabet.BytesToLetters(query)}
 	fsb.Alpha = alphaWithBlank // alphabet.DNAgapped
 
-	alignList, err := smith.Align(fsa, fsb)
+	alignList, err := smithSWAFFINE.Align(fsa, fsb)
 	if err != nil {
-		return Match{}, err
+		return
 	}
-	highestMatch := Match{Score: -1000}
 	for _, aln := range alignList {
 		score := aln.(scorer).Score()
 		s1 := aln.Features()[0].Start()
 		e1 := aln.Features()[0].End()
 		s2 := aln.Features()[1].Start()
 		e2 := aln.Features()[1].End()
-		if highestMatch.Score < score {
-			highestMatch = Match{
-				S1:    s1,
-				E1:    e1,
-				S2:    s2,
-				E2:    e2,
-				Score: score,
-			}
+		w1 := e1 - s1
+		w2 := e2 - s2
+		//fmt.Printf("%s %#v %#v\n", aln, string(subject[s1:e1]), string(query[s2:e2]))
+		switch {
+		case w1 == 0:
+			match.DeleteCount += w2
+			match.MisMatchCount += w2
+		case w2 == 0:
+			match.InsertCount += w1
+			match.MisMatchCount += w1
+		default:
+			w := (w1 + score) / 3
+			match.MatchCount += w
+			match.MisMatchCount += w1 - w
+			match.ChangeCount += w1 - w
 		}
 	}
-	return highestMatch, nil
+	alignLatPos := len(alignList) - 1
+	match.BeginPos = alignList[0].Features()[0].Start()
+	match.EndPos = alignList[alignLatPos].Features()[0].End()
+	trimCount := alignList[0].Features()[1].Start() +
+		(queryLength - alignList[alignLatPos].Features()[1].End())
+	match.DeleteCount += trimCount
+	match.MisMatchCount += trimCount
+	return
 }
