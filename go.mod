@@ -6,7 +6,6 @@ require (
 	github.com/andybalholm/brotli v1.0.4
 	github.com/biogo/biogo v1.0.3
 	github.com/google/uuid v1.3.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sis6789/simple_mongo v0.0.0-20211103000632-3aa5ff321a5f
 	go.mongodb.org/mongo-driver v1.7.3
 )
