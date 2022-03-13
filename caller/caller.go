@@ -8,17 +8,17 @@ import (
 )
 
 func Caller() string {
-	ix := 2
+	ix := 1
 	stack := ""
 	for {
 		_, file, line, ok := runtime.Caller(ix)
 		if ok {
-			stack += "<" + filepath.Base(file) + ":" + strconv.Itoa(line)
+			stack += " < " + filepath.Base(file) + ":" + strconv.Itoa(line)
 			ix++
 		} else {
 			break
 		}
 	}
-	pos := strings.LastIndex(stack, "<")
-	return stack[:pos] + "$"
+	pos := strings.LastIndex(stack, " < ")
+	return stack[:pos] + " $"
 }
