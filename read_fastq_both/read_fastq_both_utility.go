@@ -17,10 +17,12 @@ func init() {
 	complementTable['T'] = 'A'
 	complementTable['C'] = 'G'
 	complementTable['G'] = 'C'
+	complementTable['N'] = 'N'
 	complementTable['a'] = 't'
 	complementTable['t'] = 'a'
 	complementTable['c'] = 'g'
 	complementTable['g'] = 'c'
+	complementTable['n'] = 'n'
 }
 
 func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
