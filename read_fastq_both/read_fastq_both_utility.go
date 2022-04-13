@@ -116,3 +116,14 @@ func ReverseComplementString(s *string) {
 	}
 	*s = string(sb)
 }
+
+// ReverseString string을 역순으로 배열한다. 입력을 직접 변경한다.
+func ReverseString(s *string) {
+	sb := []byte(*s)
+	n := len(sb)
+	swap := reflect.Swapper(sb)
+	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+		swap(i, j)
+	}
+	*s = string(sb)
+}

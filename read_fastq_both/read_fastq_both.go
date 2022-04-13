@@ -132,14 +132,14 @@ readR1:
 		}
 		x.lineNumber[0]++
 		switch x.lineNumber[0] % 4 {
-		case 2:
-			// nucleotide sequence
-			x.Text[0] = x.scan[0].Text()
-			x.recCount[0]++
 		case 0:
 			// phred
 			x.Phred[0] = x.scan[0].Text()
 			break readR1
+		case 2:
+			// nucleotide sequence
+			x.Text[0] = x.scan[0].Text()
+			x.recCount[0]++
 		}
 	}
 	// read R2
@@ -156,16 +156,16 @@ readR2:
 		}
 		x.lineNumber[1]++
 		switch x.lineNumber[1] % 4 {
+		case 0:
+			// phred
+			x.Phred[1] = x.scan[1].Text()
+			ReverseString(&x.Phred[1])
+			break readR2
 		case 2:
 			// nucleotide sequence
 			x.Text[1] = x.scan[1].Text()
 			ReverseComplementString(&x.Text[1])
 			x.recCount[1]++
-		case 0:
-			// phred
-			x.Phred[1] = x.scan[1].Text()
-			ReverseComplementString(&x.Phred[1])
-			break readR2
 		}
 	}
 	return true
