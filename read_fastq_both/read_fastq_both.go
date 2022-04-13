@@ -20,6 +20,7 @@ type ReadPair struct {
 	lineNumber [2]int
 	recCount   [2]int
 	Text       [2]string
+	Phred      [2]string
 }
 
 // New - 패어 파일을 공통으로 읽도록 하는 구조체를 새로이 생성한다.
@@ -121,6 +122,7 @@ func (x *ReadPair) Close() {
 func (x *ReadPair) Next() bool {
 
 	// read R1
+readR1:
 	for {
 		if !x.scan[0].Scan() {
 			if x.scan[0].Err() != nil {
@@ -129,16 +131,22 @@ func (x *ReadPair) Next() bool {
 			return false
 		}
 		x.lineNumber[0]++
-		if x.lineNumber[0]%4 == 2 {
+		switch x.lineNumber[0] % 4 {
+		case 2:
+			// nucleotide sequence
 			x.Text[0] = x.scan[0].Text()
 			x.recCount[0]++
-			break
+		case 0:
+			// phred
+			x.Phred[0] = x.scan[0].Text()
+			break readR1
 		}
 	}
 	// read R2
 	if !x.isPair {
 		return true
 	}
+readR2:
 	for {
 		if !x.scan[1].Scan() {
 			if x.scan[1].Err() != nil {
@@ -147,11 +155,17 @@ func (x *ReadPair) Next() bool {
 			return false
 		}
 		x.lineNumber[1]++
-		if x.lineNumber[1]%4 == 2 {
+		switch x.lineNumber[1] % 4 {
+		case 2:
+			// nucleotide sequence
 			x.Text[1] = x.scan[1].Text()
 			ReverseComplementString(&x.Text[1])
 			x.recCount[1]++
-			break
+		case 0:
+			// phred
+			x.Phred[1] = x.scan[1].Text()
+			ReverseComplementString(&x.Phred[1])
+			break readR2
 		}
 	}
 	return true
