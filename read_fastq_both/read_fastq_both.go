@@ -2,6 +2,8 @@ package read_fastq_both
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,13 +11,15 @@ import (
 )
 
 type ReadPair struct {
-	isReady    bool
-	isPair     bool
-	path       string
-	err        error
-	onlySide   int
-	fileName   [2]string
-	file       [2]*os.File
+	isReady   bool
+	isPair    bool
+	path      string
+	err       error
+	onlySide  int
+	fileName  [2]string
+	fileBytes [2][]byte
+	reader    [2]*bytes.Reader
+	//file       [2]*os.File
 	scan       [2]*bufio.Scanner
 	lineNumber [2]int
 	recCount   [2]int
@@ -34,34 +38,68 @@ func New() *ReadPair {
 
 // Open - 경로와 최대 2개의 파일을 지정하여 동기화된 읽기를 준비한다.
 func (x *ReadPair) Open(path string, name ...string) {
+	var err error
 	switch len(name) {
 	case 0:
-		panic("path,name is required.")
+		log.Fatalf("no file is specified")
 	case 1:
 		x.isPair = false
 		x.path = path
 		x.fileName[0] = name[0]
-		if x.file[0], x.err = os.Open(filepath.Join(path, name[0])); x.err != nil {
-			panic(x.err)
+		x.fileBytes[0], err = os.ReadFile(filepath.Join(path, name[0]))
+		if err != nil {
+			log.Fatalf("%v", err)
 		}
-		x.scan[0] = bufio.NewScanner(x.file[0])
+		x.reader[0] = bytes.NewReader(x.fileBytes[0])
+		if filepath.Ext(name[0]) == ".gz" {
+			gzReader, err := gzip.NewReader(x.reader[0])
+			if err != nil {
+				log.Fatalf("%v", err)
+			}
+			x.scan[0] = bufio.NewScanner(gzReader)
+		} else {
+			x.scan[0] = bufio.NewScanner(x.reader[0])
+		}
 	case 2:
 		x.isPair = true
 		x.path = path
 		x.fileName[0] = name[0]
 		x.fileName[1] = name[1]
-		if x.file[0], x.err = os.Open(filepath.Join(path, name[0])); x.err != nil {
-			panic(x.err)
+		x.isReady = true
+		// read 1
+		x.fileBytes[0], err = os.ReadFile(filepath.Join(path, name[0]))
+		if err != nil {
+			log.Fatalf("%v", err)
 		}
-		x.scan[0] = bufio.NewScanner(x.file[0])
-		if x.file[1], x.err = os.Open(filepath.Join(path, name[1])); x.err != nil {
-			panic(x.err)
+		x.reader[0] = bytes.NewReader(x.fileBytes[0])
+		if filepath.Ext(name[0]) == ".gz" {
+			gzReader, err := gzip.NewReader(x.reader[0])
+			if err != nil {
+				log.Fatalf("%v", err)
+			}
+			x.scan[0] = bufio.NewScanner(gzReader)
+		} else {
+			x.scan[0] = bufio.NewScanner(x.reader[0])
 		}
-		x.scan[1] = bufio.NewScanner(x.file[1])
+		// read 2
+		x.fileBytes[1], err = os.ReadFile(filepath.Join(path, name[1]))
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		x.reader[1] = bytes.NewReader(x.fileBytes[1])
+		if filepath.Ext(name[0]) == ".gz" {
+			gzReader, err := gzip.NewReader(x.reader[1])
+			if err != nil {
+				log.Fatalf("%v", err)
+			}
+			x.scan[1] = bufio.NewScanner(gzReader)
+		} else {
+			x.scan[1] = bufio.NewScanner(x.reader[1])
+		}
 	default:
-		panic("too many parameters. path and max 2 name.")
+		log.Printf("too many parameters. path and max 2 name.")
+		x.isReady = false
 	}
-	x.isReady = true
 }
 
 // KeyomicsFastqFileNameRegex
@@ -94,26 +132,17 @@ func (x *ReadPair) OpenPair(path string, r1Name string) {
 
 // Close - 사용중인 파일을 닫고 구조체를 초기화 한다.
 func (x *ReadPair) Close() {
-	if x.isReady {
-		if x.err = x.file[0].Close(); x.err != nil {
-			panic(x.err)
-		}
-		if x.isPair {
-			if x.err = x.file[1].Close(); x.err != nil {
-				panic(x.err)
-			}
-		}
-	}
 	x.isReady = false
 	x.isPair = false
 	x.path = ""
 	x.err = nil
 	x.fileName = [2]string{"", ""}
-	x.file = [2]*os.File{nil, nil}
 	x.scan = [2]*bufio.Scanner{nil, nil}
 	x.lineNumber = [2]int{0, 0}
 	x.recCount = [2]int{0, 0}
 	x.Text = [2]string{"", ""}
+	x.reader = [2]*bytes.Reader{nil, nil}
+	x.fileBytes = [2][]byte{nil, nil}
 }
 
 // Next - 다음 fastq sequence를 읽어 구조체 Text 필드에 저장한다.
@@ -199,7 +228,7 @@ func (x *ReadPair) AtRec(recOrdinal int) bool {
 					panic(x.scan[0].Err())
 				}
 				if recOrdinal > x.recCount[0] {
-					panic("EOF before request ordinal")
+					log.Printf("EOF before requested ordinal")
 				}
 				return false
 			}
@@ -217,7 +246,7 @@ func (x *ReadPair) AtRec(recOrdinal int) bool {
 		for {
 			if !x.scan[1].Scan() {
 				if x.scan[1].Err() != nil {
-					panic(x.scan[1].Err())
+					log.Printf("%v", x.scan[1].Err())
 				}
 				return false
 			}
@@ -241,10 +270,12 @@ func (x *ReadPair) AtRec(recOrdinal int) bool {
 func (x *ReadPair) At2Rec(recOrdinal int) bool {
 
 	if !x.isPair {
-		panic("single file. Read2 is illegal.")
+		log.Printf("single file. Read2 is illegal.")
+		return false
 	}
 	if recOrdinal < x.recCount[1] {
-		panic("reverse ordinal is not supported.")
+		log.Printf("reverse ordinal is not supported.")
+		return false
 	}
 
 	for x.recCount[1] < recOrdinal {
@@ -252,10 +283,10 @@ func (x *ReadPair) At2Rec(recOrdinal int) bool {
 		for {
 			if !x.scan[1].Scan() {
 				if x.scan[1].Err() != nil {
-					panic(x.scan[1].Err())
+					log.Printf("%v", x.scan[1].Err())
 				}
 				if recOrdinal > x.recCount[1] {
-					panic("EOF before request ordinal")
+					log.Printf("EOF before request ordinal")
 				}
 				return false
 			}

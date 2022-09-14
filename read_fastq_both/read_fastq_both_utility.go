@@ -1,10 +1,12 @@
 package read_fastq_both
 
 import (
-	"io/ioutil"
+	"errors"
 	"log"
+	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 
 	"github.com/sis6789/nucs/caller"
@@ -31,7 +33,8 @@ func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
 	FNum  int
 	RNum  int
 	Ext   string
-}) {
+	GZip  string
+}, err error) {
 	nullZero := func(w string) int {
 		if w == "" {
 			return 0
@@ -44,9 +47,10 @@ func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
 	}
 	match := namedPattern.FindStringSubmatch(source)
 	if match == nil {
-		rVal.Ext = "ERROR!"
-		return rVal
+		err = errors.New("no match")
+		return
 	}
+	err = nil
 	for i, name := range namedPattern.SubexpNames() {
 		switch name {
 		case "gname":
@@ -59,42 +63,48 @@ func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
 			rVal.RNum = nullZero(match[i])
 		case "ext":
 			rVal.Ext = match[i]
+		case "gzip":
+			rVal.GZip = match[i]
 		}
 	}
-	return rVal
+	return
 }
 
 // PairList : fastq 파일에 대한 키오믹스 명영규칙에 따라 존재하는 파일의 R1, R2 쌍이 값을 결정하여 그 목록을 반환한다.
 // 각 값은 semi-colon으로 분리하여 사용하도록 한다.
 // R1 파일만 존재하면 semi-colon 없이 하나의 값만을 반환한다.
-func PairList(path string, fileNamePattern string) []string {
-	regTarget := regexp.MustCompile(fileNamePattern)
+func PairList(path string, fileNamePattern string) (fnList []string) {
+	regexpFnFields := regexp.MustCompile(fileNamePattern)
 	// get list
-	files, err := ioutil.ReadDir(path)
+	fnGlob, err := filepath.Glob(filepath.Join(path, "*.*"))
 	if err != nil {
 		log.Fatalln(caller.Caller(), err)
 	}
-	var fnList []string
+	if fnGlob == nil {
+		return nil
+	}
+	// sort
+	sort.Strings(fnGlob)
+	// name pairing
 	var fnPair = ""
 	var fnOne = false
-	for _, fi := range files {
-		if fi.IsDir() {
+	for _, fi := range fnGlob {
+		fiName := filepath.Base(fi)
+		fields, err := MatchNamedField(regexpFnFields, fiName)
+		if err != nil {
+			// no matching name format
 			continue
 		}
-		if !regTarget.MatchString(fi.Name()) {
-			continue
-		}
-		fields := MatchNamedField(regTarget, fi.Name())
 		switch fields.RNum {
 		case 1:
 			if fnOne {
 				fnList = append(fnList, fnPair)
 			}
-			fnPair = fi.Name()
+			fnPair = fiName
 			fnOne = true
 		case 2:
 			if fnOne {
-				fnPair += ";" + fi.Name()
+				fnPair += ";" + fiName
 				fnList = append(fnList, fnPair)
 				fnOne = false
 				fnPair = ""
