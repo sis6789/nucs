@@ -3,6 +3,7 @@ package read_fastq_both
 import (
 	"errors"
 	"log"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -74,18 +75,31 @@ func MatchNamedField(namedPattern *regexp.Regexp, source string) (rVal struct {
 // 각 값은 semi-colon으로 분리하여 사용하도록 한다.
 // R1 파일만 존재하면 semi-colon 없이 하나의 값만을 반환한다.
 func PairList(path string, fileNamePattern string) (fnList []string) {
-	regexpFnFields := regexp.MustCompile(fileNamePattern)
 	// get list
-	fnGlob, err := filepath.Glob(filepath.Join(path, "*.*"))
+	pathGlob, err := filepath.Glob(filepath.Join(path, "*"))
 	if err != nil {
 		log.Fatalln(caller.Caller(), err)
+	}
+	if pathGlob == nil {
+		return nil
+	}
+	// select file only
+	var fnGlob []string
+	for _, fn := range pathGlob {
+		if fileInfo, err := os.Stat(fn); err == nil {
+			if !fileInfo.IsDir() {
+				fnGlob = append(fnGlob, fn)
+			}
+		}
 	}
 	if fnGlob == nil {
 		return nil
 	}
 	// sort
 	sort.Strings(fnGlob)
+
 	// name pairing
+	regexpFnFields := regexp.MustCompile(fileNamePattern)
 	var fnPair = ""
 	var fnOne = false
 	for _, fi := range fnGlob {
