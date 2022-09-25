@@ -1,6 +1,6 @@
 module github.com/sis6789/nucs
 
-go 1.17
+go 1.19
 
 require (
 	github.com/andybalholm/brotli v1.0.4
