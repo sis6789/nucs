@@ -34,3 +34,10 @@ func (x *LimitGoSub) Done() {
 	<-x.waitChannel
 	return
 }
+
+func (x *LimitGoSub) Count() int {
+	defer func() {
+		_ = recover()
+	}()
+	return len(x.waitChannel)
+}
