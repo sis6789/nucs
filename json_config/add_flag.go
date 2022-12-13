@@ -13,13 +13,12 @@ func AddFlag() {
 		flag.Parse()
 	}
 	// 전체 flag 값을 추가한다.
-	log.Printf("flag system")
 	flag.VisitAll(func(f *flag.Flag) {
 		name := f.Name
 		if !strings.HasPrefix(name, "test.") {
 			value := f.Value.String()
 			Put(name, value)
-			log.Printf("\tflag\t%v\t%v", nStr(name), value)
+			log.Printf("config\tflag\t%v\t%v", nStr(name), value)
 		}
 	})
 }

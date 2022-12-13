@@ -101,6 +101,24 @@ func Read(fileName string) {
 	}
 	normalize()
 }
+func ReadString(configStr string) {
+	if len(configStr) > 0 {
+		tM := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(configStr), &tM); err != nil {
+			log.Printf("%v %v", caller.Caller(), err)
+			return
+		} else {
+			for k, v := range tM {
+				log.Printf("config\tjson\t%v\t%v", k, v)
+			}
+		}
+		Set(tM)
+	}
+	if !flag.Parsed() {
+		AddFlag()
+	}
+	normalize()
+}
 
 // Write : 현재의 설정 상태를 json 파일에 저장한다.
 func Write(fileName string) {
