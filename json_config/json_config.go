@@ -2,8 +2,8 @@ package json_config
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,6 +32,7 @@ func normalize() {
 		k1 := strings.ToLower(k)
 		k1 = strings.ReplaceAll(k1, "-", "")
 		k1 = strings.ReplaceAll(k1, "_", "")
+		k1 = strings.ReplaceAll(k1, " ", "")
 		w[k1] = v
 	}
 	for k := range jsonConfig {
@@ -76,22 +77,32 @@ func Encode() string {
 
 // Read : JSON 파일을 읽어 환경을 설정한다.
 func Read(fileName string) {
-	var err error
-	var fBytes []byte
-	fBytes, err = ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Panicln(err)
+	if fileName != "" {
+		var err error
+		var fBytes []byte
+		fBytes, err = os.ReadFile(fileName)
+		if err != nil {
+			log.Panicln(err)
+		}
+		tM := make(map[string]interface{})
+		if err := json.Unmarshal(fBytes, &tM); err != nil {
+			log.Printf("%v %v", caller.Caller(), err)
+			return
+		} else {
+			log.Printf("config from %v", fileName)
+			for k, v := range jsonConfig {
+				log.Printf("\tjson\t%v\t%v", k, v)
+			}
+		}
+		Set(tM)
 	}
-	tM := make(map[string]interface{})
-	if err := json.Unmarshal(fBytes, &tM); err != nil {
-		log.Printf("%v %v", caller.Caller(), err)
-		return
+	if !flag.Parsed() {
+		AddFlag()
 	}
-	Set(tM)
 	normalize()
 }
 
-// Write : 현재의 설정 상태를 파일에 저장한다.
+// Write : 현재의 설정 상태를 json 파일에 저장한다.
 func Write(fileName string) {
 	var err error
 	var fBytes []byte
@@ -99,9 +110,34 @@ func Write(fileName string) {
 	if err != nil {
 		log.Printf("%v %v", caller.Caller(), err)
 	}
-	err = ioutil.WriteFile(fileName, fBytes, 0777)
+	err = os.WriteFile(fileName, fBytes, 0777)
 	if err != nil {
 		log.Printf("%v %v", caller.Caller(), err)
+	}
+}
+
+// WriteUsed : 사용된 환경 변수별 값을 json file로 저장한다.
+func WriteUsed(fileName string) {
+	var kl []string
+	for k := range jsonUsed {
+		kl = append(kl, k)
+	}
+	sort.Strings(kl)
+	if len(kl) == 0 {
+		return
+	}
+	wMap := make(map[string]interface{})
+	for k := range jsonUsed {
+		wMap[k] = jsonConfig[k]
+	}
+	fBytes, err := json.Marshal(wMap)
+	if err != nil {
+		log.Printf("%v", err)
+	} else {
+		err = os.WriteFile(fileName, fBytes, 0777)
+		if err != nil {
+			log.Printf("%v", err)
+		}
 	}
 }
 
