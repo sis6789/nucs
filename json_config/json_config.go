@@ -96,9 +96,8 @@ func Read(fileName string) {
 		}
 		Set(tM)
 	}
-	if !flag.Parsed() {
-		AddFlag()
-	}
+	flag.Parse()
+	AddFlag()
 	normalize()
 }
 func ReadString(configStr string) {
