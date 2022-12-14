@@ -16,7 +16,7 @@ func AddFlag() {
 	flag.VisitAll(func(f *flag.Flag) {
 		name := f.Name
 		if !strings.HasPrefix(name, "test.") {
-			value := f.Value
+			value := f.Value.String()
 			Put(name, value)
 			log.Printf("config\tflag\t%v\t%v", nStr(name), value)
 		}
