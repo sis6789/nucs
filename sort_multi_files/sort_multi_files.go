@@ -1,12 +1,10 @@
 package sort_multi_files
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sync"
 
@@ -29,18 +27,21 @@ func SortFiles(folder string, pattern string, keyList ...string) {
 
 func targetList(folder string, pattern string) []string {
 	// 대상 파일 목록
-	regPattern := regexp.MustCompile(pattern)
-	files, err := ioutil.ReadDir(folder)
+	files, err := filepath.Glob(filepath.Join(folder, pattern))
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("%v", err)
 	}
 	var fnList []string
-	for _, fi := range files {
-		if fi.IsDir() {
+	for _, v := range files {
+		fileInfo, err := os.Stat(v)
+		if err != nil {
+			log.Printf("%v", err)
 			continue
 		}
-		if regPattern.MatchString(fi.Name()) {
-			fnList = append(fnList, fi.Name())
+		if fileInfo.IsDir() {
+			continue
+		} else {
+			fnList = append(fnList, v)
 		}
 	}
 	return fnList
