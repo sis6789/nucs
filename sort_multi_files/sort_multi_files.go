@@ -41,7 +41,7 @@ func targetList(folder string, pattern string) []string {
 		if fileInfo.IsDir() {
 			continue
 		} else {
-			fnList = append(fnList, v)
+			fnList = append(fnList, filepath.Base(v))
 		}
 	}
 	return fnList
